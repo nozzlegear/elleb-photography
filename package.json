@@ -110,14 +110,15 @@
     ]
   },
   "scripts": {
-    "build": "gulp build",
+    "build": "gulp build && yarn run zip",
     "prod": "cross-env NODE_ENV=production gulp production --production",
     "dev": "gulp development",
     "lint:js": "standard src/js/**/*.js gulpfile.js",
     "lint:css": "stylelint src/css/**/*.css",
     "lint": "yarn lint:js && yarn lint:css",
     "test": "yarn lint && gscan .",
-    "scan": "gscan ."
+    "scan": "gscan .",
+    "zip": "zip -x 'node_modules/*' -x '.git/*' -x '*.zip' -r ghost-paway-theme ."
   },
   "devDependencies": {
     "@babel/core": "^7.18.10",
