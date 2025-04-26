@@ -73,6 +73,12 @@
       "youtube_url": {
         "type": "text"
       },
+      "pinterest_url": {
+        "type": "text"
+      },
+      "tiktok_url": {
+        "type": "text"
+      },
       "publication_cover": {
         "type": "select",
         "options": [

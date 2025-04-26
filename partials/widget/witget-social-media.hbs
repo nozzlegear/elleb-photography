@@ -34,4 +34,22 @@
         </a>
     </li>
     {{/if}}
+
+    {{#if @custom.pinterest_url}}
+    <li>
+        <a href="{{@custom.pinterest_url}}" title="Pinterest" aria-label="Pinterest" target="_blank" rel="noopener noreferrer">
+            <svg class="icon"><use xlink:href="#icon-pinterest"></use></svg>
+            <span class="hidden">Pinterest</span>
+        </a>
+    </li>
+    {{/if}}
+
+    {{#if @custom.tiktok_url}}
+    <li>
+        <a href="{{@custom.tiktok_url}}" title="TikTok" aria-label="TikTok" target="_blank" rel="noopener noreferrer">
+            <svg class="icon"><use xlink:href="#icon-tiktok"></use></svg>
+            <span class="hidden">TikTok</span>
+        </a>
+    </li>
+    {{/if}}
 </ul>
