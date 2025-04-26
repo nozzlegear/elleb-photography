@@ -66,6 +66,9 @@ into the {body} of the default.hbs template --}}
         {{!-- Share in Social Media - Partials/article/article-share.hbs --}}
         {{> "article/article-share"}}
 
+        {{!-- Article comments - Partials/article/article-comments.hbs --}}
+        {{> "article/article-comments"}}
+
         {{!-- Author info - Partials/article/article-author.hbs --}}
         {{> "article/article-author"}}
     </footer>
@@ -82,8 +85,6 @@ into the {body} of the default.hbs template --}}
     {{/next_post}}
 </div>
 {{!-- ./end prev next post ---}}
-
-{{> "article/article-comments"}}
 
 {{/post}}
 
