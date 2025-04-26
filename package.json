@@ -134,7 +134,7 @@
     "cssnano": "^5.1.12",
     "cssnano-preset-advanced": "^5.3.8",
     "del": "^6.1.1",
-    "gscan": "^4.34.0",
+    "gscan": "^4.48.0",
     "gulp": "^4.0.2",
     "gulp-header": "^2.0.9",
     "gulp-if": "^3.0.0",
