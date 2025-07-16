@@ -28,7 +28,7 @@ import 'lazysizes'
   /* return if you are not on the post page
   /* ---------------------------------------------------------- */
 
-  if(!document.querySelector('.post-body')) return
+  if (!document.querySelector('.post-body')) return
 
   /* All Video Responsive
   /* ---------------------------------------------------------- */
