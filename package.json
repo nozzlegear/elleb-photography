@@ -118,7 +118,7 @@
     "lint": "yarn lint:js && yarn lint:css",
     "test": "yarn lint && gscan .",
     "scan": "gscan .",
-    "zip": "zip -x 'node_modules/*' -x '.git/*' -x '*.zip' -r ghost-paway-theme ."
+    "zip": "zip -x 'node_modules/*' -x '.git/*' -x '*.zip' -x '.claude/*' -r ghost-paway-theme ."
   },
   "devDependencies": {
     "@tailwindcss/line-clamp": "^0.4.0",
