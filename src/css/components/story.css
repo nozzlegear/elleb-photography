@@ -5,11 +5,6 @@
   &-body {
     padding: 10% 5%;
   }
-
-  /* Hover */
-  &:hover .story-image-link::before {
-    background-color: rgba(0, 0, 0, .55);
-  }
 }
 
 .story-figure {
@@ -29,6 +24,10 @@
   opacity: 1;
   background-color: transparent;
   background-image: linear-gradient(to top, rgba(0, 0, 0, .8) 0%, rgba(255, 255, 255, 0) 60%);
+}
+
+.story:hover .story-image-link::before {
+  background-color: rgba(0, 0, 0, .55);
 }
 
 /* .cat-links-item {
