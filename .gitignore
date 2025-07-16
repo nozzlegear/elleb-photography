@@ -28,6 +28,10 @@ projectFilesBackup
 .DS_Store
 
 dist/
+assets/
+# These files are compiled during the build process
+partials/amp/amp-styles.hbs
+partials/main-styles.hbs
 
 config.json
 changelog.md
