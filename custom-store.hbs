@@ -1,3 +1,35 @@
+<template id="product-card-template">
+    <div class="kg-card kg-product-card">
+        <div class="kg-product-card-container">
+
+            <img src="${data.productImageSrc}" ${data.productImageWidth ? `width="${data.productImageWidth}"` : ''} ${data.productImageHeight ? `height="${data.productImageHeight}"` : ''} class="kg-product-card-image" loading="lazy" />
+
+            <div class="kg-product-card-title-container">
+                <h4 class="kg-product-card-title">Product Title</h4>
+                <h5 class="kg-product-card-title">Product Subtitle</h5>
+            </div>
+
+            <!-- Product ratings here -->
+            <div class="kg-product-card-rating">
+            </div>
+
+            <div class="kg-product-card-description">Product Description</div>
+
+            <button class="kg-product-card-button kg-product-card-btn-accent">
+                <span class=kg-product-card-button-text">Buy Now</span>
+            </button>
+        </div>
+    </div>
+</template>
+
+<template id="product-rating-template">
+    <span class="${data.star1} kg-product-card-rating-star">${data.starIcon}</span>
+    <span class="${data.star2} kg-product-card-rating-star">${data.starIcon}</span>
+    <span class="${data.star3} kg-product-card-rating-star">${data.starIcon}</span>
+    <span class="${data.star4} kg-product-card-rating-star">${data.starIcon}</span>
+    <span class="${data.star5} kg-product-card-rating-star">${data.starIcon}</span>
+</template>
+
 <script>
     const ratingImage = options.design?.backgroundIsDark
         ? `https://static.ghost.org/v4.0.0/images/star-rating-darkmode-${dataset.productStarRating}.png`
@@ -29,35 +61,3 @@
         }
     }
 </script>
-
-
-<template id="product-card-template">
-    <div class="kg-card kg-product-card">
-        <div class="kg-product-card-container">
-
-            <img src="${data.productImageSrc}" ${data.productImageWidth ? `width="${data.productImageWidth}"` : ''} ${data.productImageHeight ? `height="${data.productImageHeight}"` : ''} class="kg-product-card-image" loading="lazy" />
-
-            <div class="kg-product-card-title-container">
-                <h4 class="kg-product-card-title">Product Title</h4>
-            </div>
-
-            <!-- Product ratings here -->
-            <div class="kg-product-card-rating">
-            </div>
-
-            <div class="kg-product-card-description">Product Description</div>
-
-            <a href="${data.productUrl}" class="kg-product-card-button kg-product-card-btn-accent" target="_blank" rel="noopener noreferrer">
-                <span>Button Text</span>
-            </a>
-        </div>
-    </div>
-</template>
-
-<template id="product-rating-template">
-    <span class="${data.star1} kg-product-card-rating-star">${data.starIcon}</span>
-    <span class="${data.star2} kg-product-card-rating-star">${data.starIcon}</span>
-    <span class="${data.star3} kg-product-card-rating-star">${data.starIcon}</span>
-    <span class="${data.star4} kg-product-card-rating-star">${data.starIcon}</span>
-    <span class="${data.star5} kg-product-card-rating-star">${data.starIcon}</span>
-</template>
