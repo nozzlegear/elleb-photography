@@ -1,0 +1,63 @@
+<script>
+    const ratingImage = options.design?.backgroundIsDark
+        ? `https://static.ghost.org/v4.0.0/images/star-rating-darkmode-${dataset.productStarRating}.png`
+        : `https://static.ghost.org/v4.0.0/images/star-rating-${dataset.productStarRating}.png`;
+
+    // Template data can be found in Ghost's test file:
+    // https://github.com/TryGhost/Ghost/blob/fcc2cbe8d947c41108dcbb4e1a94dbd0d720bb64/ghost/core/test/unit/server/services/koenig/node-renderers/product-renderer.test.js#L4
+    const templateData = {
+        starIcon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.729,1.2l3.346,6.629,6.44.638a.805.805,0,0,1,.5,1.374l-5.3,5.253,1.965,7.138a.813.813,0,0,1-1.151.935L12,19.934,5.48,23.163a.813.813,0,0,1-1.151-.935L6.294,15.09.99,9.837a.805.805,0,0,1,.5-1.374l6.44-.638L11.271,1.2A.819.819,0,0,1,12.729,1.2Z"/></svg>`,
+        ratingImage,
+        productRatingEnabled: dataset.productRatingEnabled && dataset.productStarRating !== undefined,
+        productImageSrc: '/content/images/2022/11/koenig-lexical.jpg',
+        productImageWidth: 200,
+        productImageHeight: 100,
+        productTitle: 'This is a <b>title</b>',
+        productDescription: 'This is a <b>description</b>',
+        productRatingEnabled: true,
+        productButtonEnabled: true,
+        productButton: 'Button text',
+        productUrl: 'https://google.com/',
+        productStarRating: 3,
+    };
+
+    const starActiveClasses = 'kg-product-card-rating-active';
+    for (let i = 1; i <= 5; i++) {
+        templateData['star' + i] = '';
+        if (node.productStarRating >= i) {
+            templateData['star' + i] = starActiveClasses;
+        }
+    }
+</script>
+
+
+<template id="product-card-template">
+    <div class="kg-card kg-product-card">
+        <div class="kg-product-card-container">
+
+            <img src="${data.productImageSrc}" ${data.productImageWidth ? `width="${data.productImageWidth}"` : ''} ${data.productImageHeight ? `height="${data.productImageHeight}"` : ''} class="kg-product-card-image" loading="lazy" />
+
+            <div class="kg-product-card-title-container">
+                <h4 class="kg-product-card-title">Product Title</h4>
+            </div>
+
+            <!-- Product ratings here -->
+            <div class="kg-product-card-rating">
+            </div>
+
+            <div class="kg-product-card-description">Product Description</div>
+
+            <a href="${data.productUrl}" class="kg-product-card-button kg-product-card-btn-accent" target="_blank" rel="noopener noreferrer">
+                <span>Button Text</span>
+            </a>
+        </div>
+    </div>
+</template>
+
+<template id="product-rating-template">
+    <span class="${data.star1} kg-product-card-rating-star">${data.starIcon}</span>
+    <span class="${data.star2} kg-product-card-rating-star">${data.starIcon}</span>
+    <span class="${data.star3} kg-product-card-rating-star">${data.starIcon}</span>
+    <span class="${data.star4} kg-product-card-rating-star">${data.starIcon}</span>
+    <span class="${data.star5} kg-product-card-rating-star">${data.starIcon}</span>
+</template>
