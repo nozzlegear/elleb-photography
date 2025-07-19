@@ -110,7 +110,7 @@
     ]
   },
   "scripts": {
-    "build": "vite build && yarn run zip",
+    "build": "VITE_CJS_TRACE=true vite build && yarn run zip",
     "prod": "cross-env NODE_ENV=production vite build",
     "dev": "vite build --watch",
     "lint:js": "standard src/js/**/*.ts",
@@ -121,7 +121,6 @@
     "zip": "zip -x 'node_modules/*' -x '.git/*' -x '*.zip' -x '.claude/*' -r ghost-paway-theme ."
   },
   "devDependencies": {
-    "@tailwindcss/line-clamp": "^0.4.0",
     "@tailwindcss/typography": "^0.5.4",
     "@types/node": "^20.0.0",
     "autoprefixer": "^10.4.8",
