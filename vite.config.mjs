@@ -144,8 +144,8 @@ export default defineConfig({
           fs.mkdirSync('./partials/amp', { recursive: true })
         }
 
-        createHbsFile('./assets/styles/main.css', './partials/main-styles.hbs')
-        createHbsFile('./assets/styles/amp.css', './partials/amp/amp-styles.hbs')
+        createHbsFile('./assets/styles/css/main.css', './partials/main-styles.hbs')
+        createHbsFile('./assets/styles/css/amp.css', './partials/amp/amp-styles.hbs')
       }
     }
   ]
