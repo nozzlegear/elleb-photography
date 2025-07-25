@@ -123,15 +123,16 @@
     ]
   },
   "scripts": {
-    "build": "vite build && yarn run zip",
+    "build": "yarn run build:vite && yarn run build:zip",
+    "build:vite": "vite build",
+    "build:zip": "zip -x 'node_modules/*' -x '.git/*' -x '*.zip' -x '.claude/*' -r ghost-elleb-photography-theme .",
     "prod": "cross-env NODE_ENV=production vite build",
     "dev": "vite build --watch",
     "lint:js": "standard src/js/**/*.ts",
     "lint:css": "stylelint src/css/**/*.css",
     "lint": "yarn lint:js && yarn lint:css",
     "test": "yarn lint && gscan .",
-    "scan": "gscan .",
-    "zip": "zip -x 'node_modules/*' -x '.git/*' -x '*.zip' -x '.claude/*' -r ghost-paway-theme ."
+    "scan": "gscan ."
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.4",
