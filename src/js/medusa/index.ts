@@ -1,22 +1,35 @@
 import Medusa from "@medusajs/js-sdk"
+import type { Sdk } from "./types";
 
-type MedusaConfig = {
-  backendUrl: string
-  publishableKey: string
-  debug: boolean
+function isUndefined(value: string | undefined): value is undefined {
+  return value === undefined || typeof value === "undefined";
 }
 
-const medusaConfigStr: string? = document.getElementById("medusaConfig")?.innerText;
+function getMetaConfigValue(metaElementName: string): string | undefined {
+  const selector = `meta[name=${metaElementName}]`
+  const medusaConfigStr = document.querySelector<HTMLMetaElement>(metaElementName)?.content ?? null;
 
-if (!medusaConfigStr) {
-    console.warning("#medusaConfig does not exist, script will not attempt to load Medusa products on this page.");
+  if (!medusaConfigStr) {
+    console.warn(`${selector} does not exist`);
     return;
+  }
+
+  return medusaConfigStr;
 }
 
-const medusaConfig: MedusaConfig = JSON.parse(medusaConfigStr)
+export function configureSdk(): Sdk {
+  const baseUrl = getMetaConfigValue("medusaBaseUrl");
+  const publicKey = getMetaConfigValue("medusaPublicKey");
+  const debugMode = getMetaConfigValue("medusaDebugMode");
 
-export const sdk = new Medusa({
-    baseUrl: medusaConfigStr.backendUrl,
-    debug: medusaConfigStr.debug,
-    publishableKey: medusaConfigStr.publishableKey,
-})
+  if (isUndefined(baseUrl) || isUndefined(publicKey) || isUndefined(debugMode)) {
+    console.warn(`Script will not attempt to load Medusa products on this page.`)
+    return;
+  }
+
+  return new Medusa({
+      baseUrl: baseUrl,
+      debug: Boolean(debugMode),
+      publishableKey: publicKey,
+  })
+}

@@ -1,6 +1,6 @@
 import type { Sdk, ProductMetaData } from "./types";
 import { StoreProduct, StoreProductListResponse } from "@medusajs/types";
-import { sdk } from "./"
+import { configureSdk } from "./"
 
 export async function listProducts(sdk?: Sdk): Promise<StoreProductListResponse> {
   sdk = sdk ?? configureSdk();

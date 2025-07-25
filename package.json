@@ -123,7 +123,7 @@
     ]
   },
   "scripts": {
-    "build": "VITE_CJS_TRACE=true vite build && yarn run zip",
+    "build": "vite build && yarn run zip",
     "prod": "cross-env NODE_ENV=production vite build",
     "dev": "vite build --watch",
     "lint:js": "standard src/js/**/*.ts",
