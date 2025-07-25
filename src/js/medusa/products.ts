@@ -1,12 +1,18 @@
+import type { Sdk, ProductMetaData } from "./types";
 import { StoreProduct, StoreProductListResponse } from "@medusajs/types";
 import { sdk } from "./"
 
-export async function listProducts(): Promise<StoreProductListResponse> {
+export async function listProducts(sdk?: Sdk): Promise<StoreProductListResponse> {
+  sdk = sdk ?? configureSdk();
   return await sdk.store.product.list();
 }
 
-export async function renderProductsIntoTemplate(products: StoreProduct[], template: HTMLTemplateElement, target: HTMLElement) {
-
+export async function renderProductsIntoTemplate(
+  sdk: Sdk | null,
+  products: StoreProduct[],
+  template: HTMLTemplateElement,
+  target: HTMLElement
+) {
   for (let product of products) {
     const clone = template.content.cloneNode(true) as DocumentFragment;
 
@@ -50,6 +56,34 @@ export async function renderProductsIntoTemplate(products: StoreProduct[], templ
       // TODO: clicking on the button should open Stripe's in-page payment gateway
     }
 
+    if (productRatingEl) {
+      appendStarRating(productRatingEl, product);
+    }
+
     target.appendChild(clone);
+  }
+}
+
+function appendStarRating(ratingContainer: HTMLElement, product: StoreProduct): void {
+  const templateId = "star-rating-template";
+  const starTemplate = document.getElementById(templateId) as HTMLTemplateElement | null;
+
+  if (!starTemplate)
+    throw new Error(`Template #${templateId} not found`);
+
+  const rating = (product.metadata as ProductMetaData | undefined)?.rating;
+
+  if (typeof rating !== 'number' || rating <= 0)
+    return;
+
+  const activeClass = 'kg-product-card-rating-active';
+
+  for (let i = 1; i <= 5; i++) {
+    const starRating = starTemplate.content.cloneNode(true) as HTMLElement;
+
+    if (rating >= i)
+      starRating.classList.add(activeClass);
+
+    ratingContainer.appendChild(starRating);
   }
 }
