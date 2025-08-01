@@ -5,9 +5,13 @@ function isUndefined(value: string | undefined): value is undefined {
   return value === undefined || typeof value === "undefined";
 }
 
+function parseBool(s: string): boolean {
+  return s.trim().toLowerCase() === "true";
+}
+
 function getMetaConfigValue(metaElementName: string): string | undefined {
-  const selector = `meta[name=${metaElementName}]`
-  const medusaConfigStr = document.querySelector<HTMLMetaElement>(metaElementName)?.content ?? null;
+  const selector = `meta[name="${metaElementName}"]`;
+  const medusaConfigStr = document.querySelector<HTMLMetaElement>(selector)?.content ?? null;
 
   if (!medusaConfigStr) {
     console.warn(`${selector} does not exist`);
@@ -29,7 +33,7 @@ export function configureSdk(): Sdk {
 
   return new Medusa({
       baseUrl: baseUrl,
-      debug: Boolean(debugMode),
+      debug: parseBool(debugMode),
       publishableKey: publicKey,
   })
 }
