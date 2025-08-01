@@ -18,9 +18,9 @@ function getMetaConfigValue(metaElementName: string): string | undefined {
 }
 
 export function configureSdk(): Sdk {
-  const baseUrl = getMetaConfigValue("medusaBaseUrl");
-  const publicKey = getMetaConfigValue("medusaPublicKey");
-  const debugMode = getMetaConfigValue("medusaDebugMode");
+  const baseUrl = getMetaConfigValue("medusa-base-url");
+  const publicKey = getMetaConfigValue("medusa-public-key");
+  const debugMode = getMetaConfigValue("medusa-debug-mode");
 
   if (isUndefined(baseUrl) || isUndefined(publicKey) || isUndefined(debugMode)) {
     console.warn(`Script will not attempt to load Medusa products on this page.`)
