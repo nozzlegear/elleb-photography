@@ -36,7 +36,7 @@ export default defineConfig({
     rollupOptions: {
       input: getEntries([
         'js/main.ts',
-        'js/medusa/products.ts',
+        'js/pages/products.ts',
         'css/main.css',
         'css/amp.css'
       ]),

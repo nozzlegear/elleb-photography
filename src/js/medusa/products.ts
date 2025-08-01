@@ -8,7 +8,6 @@ export async function listProducts(sdk?: Sdk): Promise<StoreProductListResponse>
 }
 
 export async function renderProductsIntoTemplate(
-  sdk: Sdk | null,
   products: StoreProduct[],
   template: HTMLTemplateElement,
   target: HTMLElement
