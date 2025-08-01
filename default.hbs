@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" type="text/css" href="{{asset "styles/main.css"}}"/>
+    <link rel="stylesheet" type="text/css" href="{{asset "styles/css/main.css"}}"/>
 
     {{#match @custom.title_font "=" "Playfair Display"}}
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
@@ -56,7 +56,7 @@
     {{ghost_foot}}
 
     {{!-- Main Scripts --}}
-    <script src="{{asset "scripts/main.js"}}"></script>
+    <script src="{{asset "js/main.js"}}"></script>
 
     {{!-- The #block helper will pull in data from the #contentFor other template files. --}}
     {{{block "scripts"}}}
