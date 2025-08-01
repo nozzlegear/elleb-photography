@@ -2,8 +2,6 @@ import * as products from "../medusa/products";
 import { configureSdk } from "../medusa/index";
 
 const sdk = configureSdk();
-const loadedProducts = await products.listProducts(sdk);
-
 const productTemplateId = "product-card-template";
 const renderTargetId = "products-container";
 const productTemplateEl = document.getElementById(productTemplateId);
@@ -14,4 +12,7 @@ if (!productTemplateEl)
 if (!renderTargetEl)
   throw new Error(`Could not find a render target element with id ${renderTargetId}.`);
 
-await products.renderProductsIntoTemplate(loadedProducts, productTemplate, renderTargetEl);
+if (sdk && productTemplateEl && renderTargetEl) {
+  const loadedProducts = await products.listProducts(sdk);
+  await products.renderProductsIntoTemplate(loadedProducts, productTemplate, renderTargetEl);
+}

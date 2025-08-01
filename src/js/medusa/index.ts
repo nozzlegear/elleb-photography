@@ -21,7 +21,7 @@ function getMetaConfigValue(metaElementName: string): string | undefined {
   return medusaConfigStr;
 }
 
-export function configureSdk(): Sdk {
+export function configureSdk(): Sdk | undefined {
   const baseUrl = getMetaConfigValue("medusa-base-url");
   const publicKey = getMetaConfigValue("medusa-public-key");
   const debugMode = getMetaConfigValue("medusa-debug-mode");
