@@ -60,7 +60,7 @@ export default defineConfig({
     },
     sourcemap: process.env.NODE_ENV !== 'production',
     minify: process.env.NODE_ENV === 'production',
-    target: 'es2018'
+    target: 'es2022'
   },
   css: {
     postcss: {
