@@ -14,8 +14,8 @@ export async function renderProductsIntoTemplate(
     const clone = template.content.cloneNode(true) as DocumentFragment;
 
     const productImgEl = clone.querySelector<HTMLImageElement>(".kg-product-card-image");
-    const productTitleEl = clone.querySelector<HTMLHeadingElement>(".kg-product-card-title");
-    const productSubtitleEl = clone.querySelector<HTMLHeadingElement>(".kg-product-card-title");
+    const productTitleEl = clone.querySelector<HTMLHeadingElement>("h4.kg-product-card-title");
+    const productSubtitleEl = clone.querySelector<HTMLHeadingElement>("h5.kg-product-card-title");
     const productDescriptionEl =clone.querySelector<HTMLDivElement>(".kg-product-card-description");
     const productRatingEl = clone.querySelector<HTMLDivElement>(".kg-product-card-rating");
     const productButtonEl = clone.querySelector<HTMLAnchorElement>(".kg-product-card-button");
@@ -31,16 +31,20 @@ export async function renderProductsIntoTemplate(
       }
     }
 
-    // Set the template's title and subtitle
+    // Set the template's title
     if (productTitleEl) {
       productTitleEl.textContent = product.title;
+    } else {
+      // Remove the subtitle element
+      productTitleEl?.remove();
+    }
 
-      if (productSubtitleEl && product.subtitle) {
-        productSubtitleEl.textContent = product.subtitle;
-      } else {
-        // Remove the subtitle element
-        productSubtitleEl?.remove();
-      }
+    // Set the template's subtitle
+    if (productSubtitleEl && product.subtitle) {
+      productSubtitleEl.textContent = product.subtitle;
+    } else {
+      // Remove the subtitle element
+      productSubtitleEl?.remove();
     }
 
     // Set the template's description
