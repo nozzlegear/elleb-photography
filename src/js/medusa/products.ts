@@ -23,7 +23,7 @@ export async function renderProductsIntoTemplate(
 
     // Set the template's image
     if (productImgEl) {
-      const imageUrl = product.images?.at(0)?.url ?? product.thumbnail;
+      const imageUrl = product.thumbnail ?? product.images?.at(0)?.url;
 
       if (imageUrl) {
         productImgEl.src = imageUrl;
