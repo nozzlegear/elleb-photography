@@ -15,7 +15,7 @@ export async function renderProductsIntoTemplate(
 
     const productImgEl = clone.querySelector<HTMLImageElement>(".kg-product-card-image");
     const productTitleEl = clone.querySelector<HTMLHeadingElement>("h4.kg-product-card-title");
-    const productSubtitleEl = clone.querySelector<HTMLHeadingElement>("h5.kg-product-card-title");
+    const productSubtitleEl = clone.querySelector<HTMLHeadingElement>("h5.kg-product-card-subtitle");
     const productDescriptionEl =clone.querySelector<HTMLDivElement>(".kg-product-card-description");
     const productRatingEl = clone.querySelector<HTMLDivElement>(".kg-product-card-rating");
     const productButtonEl = clone.querySelector<HTMLAnchorElement>(".kg-product-card-button");

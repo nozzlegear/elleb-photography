@@ -18,4 +18,9 @@
     @media (min-width: 1025px) {
       grid-template-columns: 1fr 1fr 1fr;
     }
+
+    h5.kg-product-card-subtitle {
+      font-size: 16px;
+      color: var(--color-primary);
+    }
 }
