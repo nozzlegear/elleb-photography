@@ -4,8 +4,8 @@ import { configureSdk } from "../medusa/index";
 const sdk = configureSdk();
 const productTemplateId = "product-card-template";
 const renderTargetId = "products-container";
-const productTemplateEl = document.getElementById(productTemplateId);
-const renderTargetEl = document.getElementById(renderTargetId);
+const productTemplateEl = document.getElementById(productTemplateId) as HTMLTemplateElement | undefined;
+const renderTargetEl = document.getElementById(renderTargetId) as HTMLDivElement | undefined;
 
 if (!productTemplateEl)
   throw new Error(`Could not find a product template element with id ${productTemplateId}.`);
@@ -14,5 +14,5 @@ if (!renderTargetEl)
 
 if (sdk && productTemplateEl && renderTargetEl) {
   const loadedProducts = await products.listProducts(sdk);
-  await products.renderProductsIntoTemplate(loadedProducts, productTemplate, renderTargetEl);
+  await products.renderProductsIntoTemplate(loadedProducts, productTemplateEl, renderTargetEl);
 }
