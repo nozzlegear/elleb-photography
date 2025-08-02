@@ -19,7 +19,7 @@ export async function renderProductsIntoTemplate(
     const productDescriptionEl =clone.querySelector<HTMLDivElement>(".kg-product-card-description");
     const productRatingEl = clone.querySelector<HTMLDivElement>(".kg-product-card-rating");
     const productButtonEl = clone.querySelector<HTMLAnchorElement>(".kg-product-card-button");
-
+    const productButtonTextEl = clone.querySelector<HTMLSpanElement>(".kg-product-card-button-text");
 
     // Set the template's image
     if (productImgEl) {
@@ -32,7 +32,7 @@ export async function renderProductsIntoTemplate(
     }
 
     // Set the template's title
-    if (productTitleEl) {
+    if (productTitleEl && product.title) {
       productTitleEl.textContent = product.title;
     } else {
       // Remove the subtitle element
@@ -55,6 +55,12 @@ export async function renderProductsIntoTemplate(
     // Set the template's button
     if (productButtonEl) {
       // TODO: clicking on the button should open Stripe's in-page payment gateway
+      productButtonEl.classList.remove("is-primary");
+
+      if (productButtonTextEl && (true || product.status === "proposed")) {
+        productButtonTextEl.textContent = "Coming Soon";
+        productButtonTextEl.title = "This product is not yet available, check back soon!"
+      }
     }
 
     if (productRatingEl) {
