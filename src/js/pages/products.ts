@@ -14,5 +14,5 @@ if (!renderTargetEl)
 
 if (sdk && productTemplateEl && renderTargetEl) {
   const loadedProducts = await products.listProducts(sdk);
-  await products.renderProductsIntoTemplate(loadedProducts, productTemplateEl, renderTargetEl);
+  await products.renderProductsIntoTemplate(loadedProducts.products, productTemplateEl, renderTargetEl);
 }
