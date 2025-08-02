@@ -1,0 +1,21 @@
+#products-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-column-gap: 20px;
+    grid-row-gap: 30px;
+
+    /* Phone */
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    /* Tablet */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* Desktop */
+    @media (min-width: 1025px) {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+}

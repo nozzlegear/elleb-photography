@@ -38,7 +38,8 @@ export default defineConfig({
         'js/main.ts',
         'js/pages/products.ts',
         'css/main.css',
-        'css/amp.css'
+        'css/amp.css',
+        'css/pages/store.css',
       ]),
       output: {
         banner: BuildComments,
