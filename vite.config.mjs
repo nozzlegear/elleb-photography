@@ -34,8 +34,10 @@ export default defineConfig({
     outDir: 'assets',
     emptyOutDir: true,
     rollupOptions: {
+      external: [],
       input: getEntries([
         'js/main.ts',
+        'js/cart-button.ts',
         'js/pages/products.ts',
         'css/main.css',
         'css/amp.css',
@@ -50,13 +52,16 @@ export default defineConfig({
           }
           return '[name].js'
         },
+        chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
           if (assetInfo.name.endsWith('.css')) {
             const name = assetInfo.name.replace('.css', '')
             return `styles/${name}.css`
           }
           return 'assets/[name].[ext]'
-        }
+        },
+        // Enable proper code splitting for modules
+        inlineDynamicImports: false
       }
     },
     sourcemap: process.env.NODE_ENV !== 'production',

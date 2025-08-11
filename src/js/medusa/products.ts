@@ -7,6 +7,7 @@ export async function listProducts(sdk: Sdk): Promise<StoreProductListResponse> 
 
 export async function renderProductsIntoTemplate(
   products: StoreProduct[],
+  onClickBuy: (storeProduct: StoreProduct) => unknown,
   template: HTMLTemplateElement,
   target: HTMLElement
 ) {
@@ -54,12 +55,17 @@ export async function renderProductsIntoTemplate(
 
     // Set the template's button
     if (productButtonEl) {
-      // TODO: clicking on the button should open Stripe's in-page payment gateway
       productButtonEl.classList.remove("is-primary");
 
-      if (productButtonTextEl && (true || product.status === "proposed")) {
+      productButtonEl.addEventListener("click", ev => {
+        ev.preventDefault();
+        onClickBuy.apply(productButtonEl, [product]);
+      });
+
+      if (productButtonTextEl && product.status === "proposed") {
         productButtonTextEl.textContent = "Coming Soon";
         productButtonTextEl.title = "This product is not yet available, check back soon!"
+        productButtonEl.disabled = true;
       }
     }
 

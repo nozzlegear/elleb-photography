@@ -1,0 +1,19 @@
+<template id="cart-item-template">
+    <div class="cart-item flex items-center py-3 border-b border-gray-200" data-line-item-id="">
+        <div class="cart-item-image w-16 h-16 mr-3">
+            <img src="" alt="" class="w-full h-full object-cover rounded">
+        </div>
+        <div class="cart-item-details flex-1">
+            <h4 class="cart-item-title font-medium text-sm"></h4>
+            <p class="cart-item-variant text-xs text-gray-500" style="display: none;"></p>
+            <div class="flex items-center justify-between mt-1">
+                <span class="cart-item-price text-sm font-medium"></span>
+                <div class="quantity-controls flex items-center">
+                    <button class="quantity-btn quantity-decrease w-6 h-6 flex items-center justify-center text-xs bg-gray-200 rounded-l" data-action="decrease">-</button>
+                    <span class="quantity-display px-2 py-1 text-xs bg-gray-100"></span>
+                    <button class="quantity-btn quantity-increase w-6 h-6 flex items-center justify-center text-xs bg-gray-200 rounded-r" data-action="increase">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
