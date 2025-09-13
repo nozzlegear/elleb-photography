@@ -1,8 +1,10 @@
 import type { Sdk, ProductMetaData } from "./types";
-import type { StoreProduct, StoreProductListResponse } from "@medusajs/types";
+import type { StoreProduct, StoreProductListResponse, StoreProductVariant, ProductOption } from "@medusajs/types";
 
 export async function listProducts(sdk: Sdk): Promise<StoreProductListResponse> {
-  return await sdk.store.product.list();
+  return await sdk.store.product.list({
+    fields: "*variants,*variants.prices,*options,*options.values"
+  });
 }
 
 export async function renderProductsIntoTemplate(
@@ -19,6 +21,8 @@ export async function renderProductsIntoTemplate(
     const productSubtitleEl = clone.querySelector<HTMLHeadingElement>("h5.kg-product-card-subtitle");
     const productDescriptionEl =clone.querySelector<HTMLDivElement>(".kg-product-card-description");
     const productRatingEl = clone.querySelector<HTMLDivElement>(".kg-product-card-rating");
+    const productPriceEl = clone.querySelector<HTMLSpanElement>(".kg-product-card-price-amount");
+    const productVariantsEl = clone.querySelector<HTMLDivElement>(".kg-product-card-variants");
     const productButtonEl = clone.querySelector<HTMLAnchorElement>(".kg-product-card-button");
     const productButtonTextEl = clone.querySelector<HTMLSpanElement>(".kg-product-card-button-text");
 
@@ -73,6 +77,24 @@ export async function renderProductsIntoTemplate(
       appendStarRating(productRatingEl, product);
     }
 
+    // Set up variants and pricing
+    if (product.variants && product.variants.length > 0) {
+      const defaultVariant = product.variants[0];
+      
+      // Set initial price
+      if (productPriceEl && defaultVariant.prices && defaultVariant.prices.length > 0) {
+        const price = defaultVariant.prices.find(p => p.currency_code === 'usd') || defaultVariant.prices[0];
+        if (price) {
+          productPriceEl.textContent = formatPrice(price.amount, price.currency_code);
+        }
+      }
+
+      // Set up variant selection
+      if (productVariantsEl && product.options && product.options.length > 0) {
+        setupVariantSelection(product, productVariantsEl, productPriceEl);
+      }
+    }
+
     target.appendChild(clone);
   }
 }
@@ -98,5 +120,101 @@ function appendStarRating(ratingContainer: HTMLElement, product: StoreProduct): 
       starRating.classList.add(activeClass);
 
     ratingContainer.appendChild(starRating);
+  }
+}
+
+function formatPrice(amount: number | string | null, currencyCode: string): string {
+  if (!amount) return '$0.00';
+  
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  const formattedAmount = (numAmount / 100).toFixed(2);
+  
+  const currencySymbols: Record<string, string> = {
+    'usd': '$',
+    'eur': '€',
+    'gbp': '£',
+  };
+  
+  const symbol = currencySymbols[currencyCode.toLowerCase()] || currencyCode.toUpperCase();
+  return `${symbol}${formattedAmount}`;
+}
+
+function setupVariantSelection(product: StoreProduct, variantsContainer: HTMLElement, priceElement: HTMLSpanElement | null) {
+  if (!product.options || !product.variants) return;
+  
+  const selectedOptions: Record<string, string> = {};
+  
+  // Create option selectors
+  product.options.forEach(option => {
+    if (!option.values || option.values.length <= 1) return;
+    
+    const optionDiv = document.createElement('div');
+    optionDiv.className = 'kg-product-option';
+    
+    const label = document.createElement('label');
+    label.textContent = option.title || 'Option';
+    label.className = 'kg-product-option-label';
+    
+    const select = document.createElement('select');
+    select.className = 'kg-product-option-select';
+    select.dataset.optionId = option.id;
+    
+    // Add default option
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = `Select ${option.title}`;
+    select.appendChild(defaultOption);
+    
+    // Add option values
+    option.values.forEach(value => {
+      const optionElement = document.createElement('option');
+      optionElement.value = value.value;
+      optionElement.textContent = value.value;
+      select.appendChild(optionElement);
+    });
+    
+    // Set first value as selected by default
+    if (option.values.length > 0) {
+      select.value = option.values[0].value;
+      selectedOptions[option.id] = option.values[0].value;
+    }
+    
+    // Add change event listener
+    select.addEventListener('change', () => {
+      selectedOptions[option.id] = select.value;
+      updatePriceForSelectedVariant(product, selectedOptions, priceElement);
+    });
+    
+    optionDiv.appendChild(label);
+    optionDiv.appendChild(select);
+    variantsContainer.appendChild(optionDiv);
+  });
+  
+  // Show variants container if we have options
+  if (product.options.length > 0) {
+    variantsContainer.style.display = 'block';
+  }
+  
+  // Update initial price
+  updatePriceForSelectedVariant(product, selectedOptions, priceElement);
+}
+
+function updatePriceForSelectedVariant(product: StoreProduct, selectedOptions: Record<string, string>, priceElement: HTMLSpanElement | null) {
+  if (!product.variants || !priceElement) return;
+  
+  // Find matching variant based on selected options
+  const matchingVariant = product.variants.find(variant => {
+    if (!variant.options) return false;
+    
+    return variant.options.every(variantOption => {
+      return selectedOptions[variantOption.option_id] === variantOption.value;
+    });
+  });
+  
+  if (matchingVariant && matchingVariant.prices && matchingVariant.prices.length > 0) {
+    const price = matchingVariant.prices.find(p => p.currency_code === 'usd') || matchingVariant.prices[0];
+    if (price) {
+      priceElement.textContent = formatPrice(price.amount, price.currency_code);
+    }
   }
 }
