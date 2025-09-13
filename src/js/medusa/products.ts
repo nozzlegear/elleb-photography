@@ -23,7 +23,7 @@ export async function renderProductsIntoTemplate(
     const productRatingEl = clone.querySelector<HTMLDivElement>(".kg-product-card-rating");
     const productPriceEl = clone.querySelector<HTMLSpanElement>(".kg-product-card-price-amount");
     const productVariantsEl = clone.querySelector<HTMLDivElement>(".kg-product-card-variants");
-    const productButtonEl = clone.querySelector<HTMLAnchorElement>(".kg-product-card-button");
+    const productButtonEl = clone.querySelector<HTMLButtonElement>(".kg-product-card-button");
     const productButtonTextEl = clone.querySelector<HTMLSpanElement>(".kg-product-card-button-text");
 
     // Set the template's image
@@ -59,8 +59,6 @@ export async function renderProductsIntoTemplate(
 
     // Set the template's button
     if (productButtonEl) {
-      productButtonEl.classList.remove("is-primary");
-
       productButtonEl.addEventListener("click", ev => {
         ev.preventDefault();
         onClickBuy.apply(productButtonEl, [product]);
