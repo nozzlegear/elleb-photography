@@ -154,8 +154,8 @@ class CartButton {
     const thumbnail = product?.thumbnail || '/assets/img/placeholder.jpg';
     const title = product?.title || 'Product';
     const variantTitle = variant?.title && variant.title !== 'Default Title' ? variant.title : '';
-    const price = variant?.calculated_price?.calculated_amount 
-      ? (variant.calculated_price.calculated_amount / 100).toFixed(2) 
+    const price = variant?.calculated_price?.calculated_amount
+      ? variant.calculated_price.calculated_amount.toFixed(2)
       : '0.00';
 
     // Set line item ID
@@ -260,7 +260,7 @@ class CartButton {
 
   public getCartTotal(): string {
     if (!this.cart?.total) return '0.00';
-    return (this.cart.total / 100).toFixed(2);
+    return this.cart.total.toFixed(2);
   }
 }
 

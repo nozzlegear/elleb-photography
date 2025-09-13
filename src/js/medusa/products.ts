@@ -127,8 +127,8 @@ function formatPrice(amount: number | string | null, currencyCode: string): stri
   if (!amount) return '$0.00';
   
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-  const formattedAmount = (numAmount / 100).toFixed(2);
-  
+  const formattedAmount = numAmount.toFixed(2);
+
   const currencySymbols: Record<string, string> = {
     'usd': '$',
     'eur': '€',
