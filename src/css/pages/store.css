@@ -19,8 +19,25 @@
       grid-template-columns: 1fr 1fr 1fr;
     }
 
-    h5.kg-product-card-subtitle {
-      font-size: 16px;
-      color: var(--color-primary);
+    .kg-product-card-container {
+
+      h5.kg-product-card-subtitle {
+        font-size: 16px;
+        color: var(--color-primary);
+      }
+
+      .kg-product-option-label {
+        display: block;
+      }
+
+      .kg-product-option-select {
+        width: 100%;
+      }
+
+      .kg-product-card-variants,
+      .kg-product-card-price,
+      button.kg-product-card-button {
+        grid-column: 1/3;
+      }
     }
 }
