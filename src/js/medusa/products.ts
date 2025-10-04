@@ -7,12 +7,22 @@ export async function listProducts(sdk: Sdk): Promise<StoreProductListResponse> 
   });
 }
 
+/**
+ * Numerically sorts the products array by the metadata property `rank`, with the lowest absolute numerical value
+ * having the highest priority.
+ */
+function sortProductsByMetadataRank(products: StoreProduct[]) {
+  return products.sort((a, b) => (a.metadata!["rank"] as any) - (b.metadata!["rank"] as any));
+}
+
 export async function renderProductsIntoTemplate(
   products: StoreProduct[],
   onClickBuy: (storeProduct: StoreProduct) => unknown,
   template: HTMLTemplateElement,
   target: HTMLElement
 ) {
+  products = sortProductsByMetadataRank(products);
+
   for (let product of products) {
     const clone = template.content.cloneNode(true) as DocumentFragment;
 
