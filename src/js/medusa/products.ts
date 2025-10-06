@@ -1,5 +1,5 @@
 import type { Sdk, ProductMetaData } from "./types";
-import type { StoreProduct, StoreProductListResponse, StoreProductVariant, ProductOption } from "@medusajs/types";
+import type { StoreProduct, StoreProductListResponse } from "@medusajs/types";
 
 export async function listProducts(sdk: Sdk): Promise<StoreProductListResponse> {
   return await sdk.store.product.list({
@@ -12,7 +12,7 @@ export async function listProducts(sdk: Sdk): Promise<StoreProductListResponse> 
  * having the highest priority.
  */
 function sortProductsByMetadataRank(products: StoreProduct[]) {
-  return products.sort((a, b) => (a.metadata!["rank"] as any) - (b.metadata!["rank"] as any));
+  return products.sort((a, b) => (a.metadata?.["rank"] as any) - (b.metadata?.["rank"] as any));
 }
 
 export async function renderProductsIntoTemplate(
@@ -36,12 +36,26 @@ export async function renderProductsIntoTemplate(
     const productButtonEl = clone.querySelector<HTMLButtonElement>(".kg-product-card-button");
     const productButtonTextEl = clone.querySelector<HTMLSpanElement>(".kg-product-card-button-text");
 
-    // Set the template's image
+    // Set the template's images
     if (productImgEl) {
-      const imageUrl = product.thumbnail ?? product.images?.at(0)?.url;
+      const images = product.images ?? [];
+      const firstImageUrl = product.thumbnail ?? images[0]?.url;
 
-      if (imageUrl) {
-        productImgEl.src = imageUrl;
+      if (images.length > 1) {
+        // Add images to the srcset
+        const srcset: string[] = images.reduce<string[]>((srcs, image) => {
+          // Adding the thumbnail to the srcset is redundant if it's already the img's src
+          if (image.url === firstImageUrl)
+            return srcs;
+          return [...srcs, `${image.url} 2x`]
+        }, []);
+
+        productImgEl.srcset = srcset.join(", ");
+      }
+
+      // Set the fallback img element
+      if (firstImageUrl) {
+        productImgEl.src = firstImageUrl;
         productImgEl.alt = product.title;
       }
     }
