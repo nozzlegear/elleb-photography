@@ -130,7 +130,7 @@ class CartButton {
     // Render each cart item using the template
     this.cart.items.forEach(item => {
       const itemElement = this.createCartItemElement(item);
-      this.sidebarElements.cartList.appendChild(itemElement);
+      this.sidebarElements.cartList?.appendChild(itemElement);
     });
 
     // Attach event listeners to quantity controls
@@ -149,14 +149,10 @@ class CartButton {
     const cartItemElement = clone.querySelector('.cart-item') as HTMLElement;
 
     // Extract product data
-    const product = item.variant?.product;
-    const variant = item.variant;
-    const thumbnail = product?.thumbnail || '/assets/img/placeholder.jpg';
-    const title = product?.title || 'Product';
-    const variantTitle = variant?.title && variant.title !== 'Default Title' ? variant.title : '';
-    const price = variant?.calculated_price?.calculated_amount
-      ? variant.calculated_price.calculated_amount.toFixed(2)
-      : '0.00';
+    const thumbnail = item.thumbnail ?? '/assets/img/placeholder.jpg';
+    const title = item.title;
+    const variantTitle = item.variant_title ?? '';
+    const price = item.unit_price.toFixed(2);
 
     // Set line item ID
     cartItemElement.dataset.lineItemId = item.id;
