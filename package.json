@@ -125,7 +125,7 @@
   "scripts": {
     "build": "yarn run build:vite && yarn run build:zip",
     "build:vite": "vite build",
-    "build:zip": "zip -x 'node_modules/*' -x '.git/*' -x '*.zip' -x '.claude/*' -r ghost-elleb-photography-theme .",
+    "build:zip": "zip -x 'node_modules/*' -x '.git/*' -x '*.zip' -x '.claude/*' -x '.idea/*' -x '.DS_Store' -x 'README.md' -r ghost-elleb-photography-theme .",
     "prod": "cross-env NODE_ENV=production vite build",
     "dev": "vite build --watch",
     "lint:js": "standard src/js/**/*.ts",
