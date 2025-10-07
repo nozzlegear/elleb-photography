@@ -3,7 +3,8 @@
 .sidenav {
   backface-visibility: hidden;
   min-height: 100%;
-  padding: 3% 4%;
+  /* padding: 3% 4%; */
+  padding: 16px;
   right: -100%;
   transition: all .4s ease-in-out;
 }

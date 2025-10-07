@@ -24,7 +24,7 @@ class CartButton {
 
     this.button = document.querySelector('.cart-button');
     this.countElements = document.querySelectorAll('.cart-count');
-    
+
     // Get sidebar elements
     this.sidebarElements.cartEmpty = document.querySelector('.cart-empty');
     this.sidebarElements.cartList = document.querySelector('.cart-list');
@@ -40,7 +40,7 @@ class CartButton {
 
   private async loadCart() {
     if (!this.sdk) return;
-    
+
     try {
       this.cartId = await createOrRetrieveCartId(this.sdk);
       this.cart = await getCart(this.sdk, this.cartId);
@@ -78,7 +78,7 @@ class CartButton {
     if (!this.cart || !this.countElements) return;
 
     const itemCount = this.getItemCount();
-    
+
     this.countElements.forEach(element => {
       element.textContent = itemCount.toString();
     });
@@ -104,7 +104,7 @@ class CartButton {
     // Show/hide cart list
     if (this.sidebarElements.cartList) {
       this.sidebarElements.cartList.style.display = isEmpty ? 'none' : 'block';
-      
+
       if (!isEmpty) {
         this.renderCartItems();
       }
@@ -179,8 +179,9 @@ class CartButton {
 
     // Populate price
     const priceEl = clone.querySelector('.cart-item-price') as HTMLElement;
-    if (priceEl) {
-      priceEl.textContent = `$${price}`;
+    const priceSpanEl = clone.querySelector(".cart-item-price .unit-price") as HTMLSpanElement;
+    if (priceEl && priceSpanEl) {
+      priceSpanEl.textContent = `$${price}/each`;
     }
 
     // Populate quantity
@@ -215,7 +216,7 @@ class CartButton {
     if (!currentItem) return;
 
     let newQuantity = currentItem.quantity;
-    
+
     if (action === 'increase') {
       newQuantity += 1;
     } else if (action === 'decrease') {
@@ -225,7 +226,7 @@ class CartButton {
     try {
       this.cart = await setItemQuantity(this.sdk, this.cartId, lineItemId, newQuantity);
       this.updateDisplay();
-      
+
       // Dispatch event for other components
       window.dispatchEvent(new CustomEvent('cart-updated', { detail: this.cart }));
     } catch (error) {

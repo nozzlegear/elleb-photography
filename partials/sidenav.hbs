@@ -3,8 +3,8 @@
         <svg class="icon is-stroke"><use xlink:href="#icon-close"></use></svg>
     </div>
 
-    <div class="text-white mb-8 font-serif font-bold text-4xl">{{@site.title}}</div>
-    {{#if @site.description}}<div class="sidenav-des mb-8 text-lg">{{@site.description}}</div>{{/if}}
+    <div class="brand text-white mb-8 font-serif font-bold text-4xl">{{@site.title}}</div>
+    {{#if @site.description}}<div class="tagline sidenav-des mb-8 text-lg">{{@site.description}}</div>{{/if}}
 
     {{!-- navigation --}}
     <nav class="sidenav-nav mb-8 lg:hidden">{{navigation}}</nav>
@@ -21,27 +21,31 @@
     {{/get}}
 
     {{!-- Cart Section --}}
-    <div class="cart-sidebar mb-8">
-        <div class="cart-header mb-4">
-            <h3 class="text-xl font-bold">Shopping Cart</h3>
-            <div class="cart-total text-lg">Total: $<span class="cart-total-amount">0.00</span></div>
-        </div>
-        
+    <div class="cart-sidebar">
+        <header class="cart-header">
+            <h3>Shopping Cart</h3>
+        </header>
+
         <div class="cart-items">
-            <div class="cart-empty text-center py-8">
-                <p class="text-gray-400">Your cart is empty</p>
+            <div class="cart-empty" hidden>
+                <p>Your cart is empty</p>
             </div>
             <div class="cart-list" style="display: none;">
                 <!-- Cart items will be populated here by JavaScript -->
             </div>
         </div>
-
-        <div class="cart-checkout mt-4">
-            <button class="checkout-button w-full bg-black text-white py-3 px-4 hover:bg-gray-800 transition-colors" style="display: none;">
-                Checkout
-            </button>
-        </div>
     </div>
+
+    <footer class="cart-footer">
+        <div class="cart-subtotal" aria-live="polite" aria-atomic="true">
+            <span>Subtotal</span>
+            <span class="cart-total-amount">$0.00</span>
+        </div>
+        <p class="cart-note">Shipping &amp; taxes calculated at checkout</p>
+        <button class="checkout-button" style="display: none;">
+            Checkout
+        </button>
+    </footer>
 
     <div class="flex-auto"></div>
 
