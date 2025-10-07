@@ -64,7 +64,7 @@ export default defineConfig({
         inlineDynamicImports: false
       }
     },
-    sourcemap: process.env.NODE_ENV !== 'production',
+    sourcemap: true,
     minify: process.env.NODE_ENV === 'production',
     target: 'es2022'
   },
