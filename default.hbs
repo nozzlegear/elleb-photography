@@ -33,6 +33,11 @@
     {{!-- This tag outputs SEO meta+structured data and other important settings --}}
     {{ghost_head}}
 
+    {{!-- Stripe Configuration (only if set in Ghost admin) --}}
+    {{#if @custom.stripe_publishable_key}}
+    <meta name="stripe-publishable-key" content="{{ @custom.stripe_publishable_key }}" />
+    {{/if}}
+
 </head>
 <body class="{{body_class}}">
     {{!-- Site Header - partials/header.hbs --}}

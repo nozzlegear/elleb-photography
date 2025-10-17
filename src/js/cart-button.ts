@@ -1,5 +1,6 @@
 import { configureSdk } from './medusa/index';
 import { createOrRetrieveCartId, getCart, setItemQuantity } from './medusa/cart';
+import { createStripeCheckoutSession } from './medusa/checkout';
 import type { StoreCart, StoreCartLineItem } from '@medusajs/types';
 
 class CartButton {
@@ -234,10 +235,44 @@ class CartButton {
     }
   }
 
-  private handleCheckout() {
-    // TODO: Implement checkout redirect or modal
-    console.log('Checkout clicked - implement checkout flow');
-    alert('Checkout functionality would redirect to payment page');
+  private async handleCheckout() {
+    if (!this.sdk || !this.cartId) {
+      console.error('SDK or cart ID not available');
+      return;
+    }
+
+    // Show loading state
+    if (this.sidebarElements.checkoutButton) {
+      this.sidebarElements.checkoutButton.textContent = 'Loading...';
+      this.sidebarElements.checkoutButton.setAttribute('disabled', 'true');
+    }
+
+    try {
+      // Get the current page origin for success/cancel URLs
+      const origin = window.location.origin;
+      const successUrl = `${origin}/store/thank-you?session_id={CHECKOUT_SESSION_ID}`;
+      const cancelUrl = `${origin}/store/cart`;
+
+      // Create Stripe checkout session and get the URL
+      const checkoutUrl = await createStripeCheckoutSession(
+        this.sdk,
+        this.cartId,
+        successUrl,
+        cancelUrl
+      );
+
+      // Redirect to Stripe checkout
+      window.location.href = checkoutUrl;
+    } catch (error) {
+      console.error('Failed to initiate checkout:', error);
+      alert('Failed to start checkout. Please try again.');
+
+      // Reset button state
+      if (this.sidebarElements.checkoutButton) {
+        this.sidebarElements.checkoutButton.textContent = 'Checkout';
+        this.sidebarElements.checkoutButton.removeAttribute('disabled');
+      }
+    }
   }
 
   private async refreshCart() {

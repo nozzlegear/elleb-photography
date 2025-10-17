@@ -79,6 +79,10 @@
       "tiktok_url": {
         "type": "text"
       },
+      "stripe_publishable_key": {
+        "type": "text",
+        "description": "Stripe publishable API key."
+      },
       "medusa_public_key": {
         "type": "text",
         "description": "MedusaJS publishable API key."
