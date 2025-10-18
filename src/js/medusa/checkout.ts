@@ -1,4 +1,4 @@
-import type { StoreCart } from "@medusajs/types";
+import type { StoreCart, StoreOrder } from "@medusajs/types";
 import type { Sdk } from "./types";
 
 /**
@@ -72,15 +72,16 @@ export async function createStripeCheckoutSession(sdk: Sdk, cartId: string, succ
  * This function is idempotent - it can be safely called multiple times
  * If the cart is already completed, it will return the existing order
  */
-export async function completeCart(sdk: Sdk, cartId: string): Promise<{ type: 'order' | 'cart'; data: any }> {
+export async function completeCart(sdk: Sdk, cartId: string): Promise<{ type: 'order' | 'cart'; data: StoreOrder | StoreCart }> {
   try {
     const result = await sdk.store.cart.complete(cartId);
     return result;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // If the cart was already completed (by webhook or previous call),
     // Medusa may return a 409 conflict or similar error
     // We should handle this gracefully
-    if (error?.response?.status === 409 || error?.status === 409) {
+    const errorWithStatus = error as { response?: { status?: number }; status?: number };
+    if (errorWithStatus?.response?.status === 409 || errorWithStatus?.status === 409) {
       // Cart already completed - try to retrieve the cart to check status
       try {
         const cart = await sdk.store.cart.retrieve(cartId);
@@ -102,7 +103,7 @@ export async function completeCart(sdk: Sdk, cartId: string): Promise<{ type: 'o
  * Verify that a Stripe checkout session was successful
  * This can be used on the thank-you page to confirm payment
  */
-export async function verifyStripeSession(sessionId: string, stripePublishableKey: string): Promise<boolean> {
+export async function verifyStripeSession(sessionId: string, _stripePublishableKey: string): Promise<boolean> {
   // Note: For security, session verification should ideally be done on the backend
   // For now, we'll rely on Medusa's cart completion to verify payment
   // The sessionId can be logged for reference

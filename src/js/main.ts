@@ -19,11 +19,13 @@ import 'lazysizes'
 
   /* Toggle Menu
   /* ---------------------------------------------------------- */
-  document.querySelectorAll('.js-menu-toggle').forEach(item => item.addEventListener('click', function (e) {
-    e.preventDefault()
+  document.querySelectorAll('.js-menu-toggle').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault()
 
-    document.body.classList.toggle('has-sidenav')
-  }))
+      document.body.classList.toggle('has-sidenav')
+    })
+  })
 
   /* return if you are not on the post page
   /* ---------------------------------------------------------- */
@@ -91,25 +93,27 @@ import 'lazysizes'
   /* Post Share
   /* ---------------------------------------------------------- */
   const pawayShare = () => {
-    document.querySelectorAll('.js-share').forEach(item => item.addEventListener('click', e => {
-      const width = 640
-      const height = 400
+    document.querySelectorAll('.js-share').forEach(item => {
+      item.addEventListener('click', e => {
+        const width = 640
+        const height = 400
 
-      const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : window.screenX
-      const dualScreenTop = window.screenTop !== undefined ? window.screenTop : window.screenY
+        const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : window.screenX
+        const dualScreenTop = window.screenTop !== undefined ? window.screenTop : window.screenY
 
-      const containerWidth = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : window.screen.width
-      const containerHeight = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : window.screen.height
+        const containerWidth = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : window.screen.width
+        const containerHeight = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : window.screen.height
 
-      const left = ((containerWidth / 2) - (width / 2)) + dualScreenLeft
-      const top = ((containerHeight / 2) - (height / 2)) + dualScreenTop
-      const newWindow = window.open(e.currentTarget.href, 'share-window', `scrollbars=yes, width=${width}, height=${height}, top=${top}, left=${left}`)
+        const left = ((containerWidth / 2) - (width / 2)) + dualScreenLeft
+        const top = ((containerHeight / 2) - (height / 2)) + dualScreenTop
+        const newWindow = window.open(e.currentTarget.href, 'share-window', `scrollbars=yes, width=${width}, height=${height}, top=${top}, left=${left}`)
 
-      // Puts focus on the newWindow
-      window.focus && newWindow.focus()
+        // Puts focus on the newWindow
+        window.focus && newWindow.focus()
 
-      e.preventDefault()
-    }))
+        e.preventDefault()
+      })
+    })
   }
 
   pawayShare()

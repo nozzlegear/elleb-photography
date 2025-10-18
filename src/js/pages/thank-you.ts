@@ -1,6 +1,6 @@
 import { configureSdk } from '../medusa/index';
 import { completeCart } from '../medusa/checkout';
-import { createOrRetrieveCartId } from '../medusa/cart';
+import type { StoreOrder, StoreCart } from '@medusajs/types';
 
 class ThankYouPage {
   private sdk = configureSdk();
@@ -83,7 +83,7 @@ class ThankYouPage {
         const cart = result.data;
 
         // Check if cart already has a completed order
-        if (cart.completed_at) {
+        if ('completed_at' in cart && cart.completed_at) {
           // Cart was already completed, likely by webhook
           // We need to fetch the order associated with this cart
           this.showError('Your order is being processed. Please check your email for confirmation.');
@@ -91,11 +91,12 @@ class ThankYouPage {
           this.showError('Failed to complete your order. Please contact support with your payment confirmation.');
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to complete order:', error);
 
       // Handle specific error cases
-      if (error?.message?.includes('already completed') || error?.message?.includes('409')) {
+      const errorWithMessage = error as { message?: string };
+      if (errorWithMessage?.message?.includes('already completed') || errorWithMessage?.message?.includes('409')) {
         // Cart was already completed (likely by webhook or previous page load)
         const cachedOrder = sessionStorage.getItem('COMPLETED_ORDER');
         if (cachedOrder) {
@@ -112,7 +113,7 @@ class ThankYouPage {
     }
   }
 
-  private displayOrderSuccess(order: any) {
+  private displayOrderSuccess(order: StoreOrder | StoreCart) {
     this.hideLoading();
     this.hideError();
 
@@ -131,9 +132,9 @@ class ThankYouPage {
     }
 
     // Display order items
-    if (this.orderItemsElement && order.items) {
+    if (this.orderItemsElement && 'items' in order && order.items) {
       this.orderItemsElement.innerHTML = '';
-      order.items.forEach((item: any) => {
+      order.items.forEach((item) => {
         const itemElement = document.createElement('div');
         itemElement.className = 'order-item';
         itemElement.innerHTML = `

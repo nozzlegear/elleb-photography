@@ -12,7 +12,7 @@ export async function listProducts(sdk: Sdk): Promise<StoreProductListResponse> 
  * having the highest priority.
  */
 function sortProductsByMetadataRank(products: StoreProduct[]) {
-  return products.sort((a, b) => (a.metadata?.["rank"] as any) - (b.metadata?.["rank"] as any));
+  return products.sort((a, b) => (a.metadata?.rank as number) - (b.metadata?.rank as number));
 }
 
 export async function renderProductsIntoTemplate(
@@ -23,7 +23,7 @@ export async function renderProductsIntoTemplate(
 ) {
   products = sortProductsByMetadataRank(products);
 
-  for (let product of products) {
+  for (const product of products) {
     const clone = template.content.cloneNode(true) as DocumentFragment;
 
     const productImgEl = clone.querySelector<HTMLImageElement>(".kg-product-card-image");
@@ -43,12 +43,13 @@ export async function renderProductsIntoTemplate(
 
       if (images.length > 1) {
         // Add images to the srcset
-        const srcset: string[] = images.reduce<string[]>((srcs, image) => {
+        const srcset: string[] = [];
+        for (const image of images) {
           // Adding the thumbnail to the srcset is redundant if it's already the img's src
-          if (image.url === firstImageUrl)
-            return srcs;
-          return [...srcs, `${image.url} 2x`]
-        }, []);
+          if (image.url !== firstImageUrl) {
+            srcset.push(`${image.url} 2x`);
+          }
+        }
 
         productImgEl.srcset = srcset.join(", ");
       }
@@ -233,7 +234,7 @@ function updatePriceForSelectedVariant(product: StoreProduct, selectedOptions: R
     });
   });
 
-  if (matchingVariant && matchingVariant.prices && matchingVariant.prices.length > 0) {
+  if (matchingVariant?.prices && matchingVariant.prices.length > 0) {
     const price = matchingVariant.prices.find(p => p.currency_code === 'usd') || matchingVariant.prices[0];
     if (price) {
       priceElement.textContent = formatPrice(price.amount, price.currency_code);
