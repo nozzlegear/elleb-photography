@@ -21,7 +21,19 @@ function getMetaConfigValue(metaElementName: string): string | undefined {
   return medusaConfigStr;
 }
 
-export function configureSdk(): Sdk | undefined {
+export type MedusaConfig = {
+  baseUrl: string;
+  publishableKey: string;
+  debug: boolean;
+};
+
+let cachedConfig: MedusaConfig | undefined;
+
+export function getMedusaConfig(): MedusaConfig | undefined {
+  if (cachedConfig) {
+    return cachedConfig;
+  }
+
   const baseUrl = getMetaConfigValue("medusa-base-url");
   const publicKey = getMetaConfigValue("medusa-public-key");
   const debugMode = getMetaConfigValue("medusa-debug-mode");
@@ -31,9 +43,21 @@ export function configureSdk(): Sdk | undefined {
     return;
   }
 
-  return new Medusa({
-      baseUrl: baseUrl,
-      debug: parseBool(debugMode),
-      publishableKey: publicKey,
-  })
+  cachedConfig = {
+    baseUrl,
+    publishableKey: publicKey,
+    debug: parseBool(debugMode),
+  };
+
+  return cachedConfig;
+}
+
+export function configureSdk(): Sdk | undefined {
+  const config = getMedusaConfig();
+
+  if (!config) {
+    return;
+  }
+
+  return new Medusa(config);
 }

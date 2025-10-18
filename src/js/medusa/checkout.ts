@@ -1,5 +1,6 @@
 import type { StoreCart, StoreOrder } from "@medusajs/types";
 import type { Sdk } from "./types";
+import { getMedusaConfig } from "./index";
 
 /**
  * Create a Stripe Checkout session and return the checkout URL
@@ -26,23 +27,19 @@ export async function createStripeCheckoutSession(sdk: Sdk, cartId: string, succ
     }
   );
 
-  // TODO: Replace this with your custom backend endpoint
-  // The standard Medusa API doesn't support Stripe Checkout redirect URLs
-  // You need to create a custom endpoint that:
-  // 1. Takes payment_collection.id, success_url, and cancel_url
-  // 2. Creates a Stripe Checkout Session using Stripe's API
-  // 3. Returns the checkout session URL
-  //
-  // Example custom endpoint:
-  // POST /store/custom/stripe-checkout
-  // Body: { payment_collection_id, success_url, cancel_url }
-  // Response: { url: "https://checkout.stripe.com/..." }
+  // Get the Medusa configuration to access baseUrl and publishableKey
+  const config = getMedusaConfig();
+  if (!config) {
+    throw new Error('Medusa configuration not available');
+  }
 
-  const checkoutResponse = await fetch(`${sdk.baseUrl}/store/custom/stripe-checkout`, {
+  // Call our custom backend endpoint to create a Stripe Checkout Session
+  // This endpoint is implemented at: /Users/nozzlegear/Repos/elleb-shop/src/api/store/custom/stripe-checkout
+  const checkoutResponse = await fetch(`${config.baseUrl}/store/custom/stripe-checkout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-publishable-api-key': sdk.config.publishableKey || '',
+      'x-publishable-api-key': config.publishableKey,
     },
     body: JSON.stringify({
       payment_collection_id: payment_collection.id,
