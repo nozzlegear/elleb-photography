@@ -66,9 +66,9 @@ class ThankYouPage {
       // Complete the cart to create an order
       const result = await completeCart(this.sdk!, cartId);
 
-      if (result.type === 'order') {
+      if (result.type === 'order' && result.order) {
         // Order was successfully created (or already existed)
-        const order = result.data;
+        const order = result.order;
 
         // Cache the order in session storage for page refreshes
         sessionStorage.setItem('COMPLETED_ORDER', JSON.stringify(order));
@@ -77,19 +77,11 @@ class ThankYouPage {
 
         // Clear the cart from localStorage so a new one will be created
         localStorage.removeItem('MEDUSA_CART_TOKEN');
-      } else {
-        // Cart completion failed - this could mean payment is still processing
-        // or there was an issue with the cart
-        const cart = result.data;
-
-        // Check if cart already has a completed order
-        if ('completed_at' in cart && cart.completed_at) {
-          // Cart was already completed, likely by webhook
-          // We need to fetch the order associated with this cart
-          this.showError('Your order is being processed. Please check your email for confirmation.');
-        } else {
-          this.showError('Failed to complete your order. Please contact support with your payment confirmation.');
-        }
+      } else if (result.type === 'cart') {
+        // Cart completion failed - Medusa returned an error
+        // The error details are in result.error
+        console.error('Cart completion error:', result.error);
+        this.showError('Failed to complete your order. Please contact support with your payment confirmation.');
       }
     } catch (error: unknown) {
       console.error('Failed to complete order:', error);
@@ -123,7 +115,8 @@ class ThankYouPage {
 
     // Display order ID
     if (this.orderIdElement && order.id) {
-      this.orderIdElement.textContent = order.display_id || order.id;
+      const displayId = 'display_id' in order ? order.display_id : order.id;
+      this.orderIdElement.textContent = String(displayId || order.id);
     }
 
     // Display order total

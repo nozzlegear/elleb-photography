@@ -1,4 +1,4 @@
-import type { StoreCart, StoreOrder } from "@medusajs/types";
+import type { HttpTypes } from "@medusajs/types";
 import type { Sdk } from "./types";
 import { getMedusaConfig } from "./index";
 
@@ -69,7 +69,7 @@ export async function createStripeCheckoutSession(sdk: Sdk, cartId: string, succ
  * This function is idempotent - it can be safely called multiple times
  * If the cart is already completed, it will return the existing order
  */
-export async function completeCart(sdk: Sdk, cartId: string): Promise<{ type: 'order' | 'cart'; data: StoreOrder | StoreCart }> {
+export async function completeCart(sdk: Sdk, cartId: string): Promise<HttpTypes.StoreCompleteCartResponse> {
   try {
     const result = await sdk.store.cart.complete(cartId);
     return result;
@@ -79,16 +79,11 @@ export async function completeCart(sdk: Sdk, cartId: string): Promise<{ type: 'o
     // We should handle this gracefully
     const errorWithStatus = error as { response?: { status?: number }; status?: number };
     if (errorWithStatus?.response?.status === 409 || errorWithStatus?.status === 409) {
-      // Cart already completed - try to retrieve the cart to check status
-      try {
-        const cart = await sdk.store.cart.retrieve(cartId);
-        if (cart.cart.completed_at) {
-          // Return cart as already completed
-          return { type: 'cart', data: cart.cart };
-        }
-      } catch (retrieveError) {
-        console.error('Failed to retrieve cart after conflict:', retrieveError);
-      }
+      // Cart was already completed (409 Conflict).
+      // Since we can't retrieve the order from the completed cart,
+      // we re-throw the error and let the caller handle it
+      // (e.g., by checking session storage for cached order)
+      throw error;
     }
 
     console.error('Failed to complete cart:', error);
