@@ -13,7 +13,6 @@
   @apply my-3 text-sm uppercase font-medium leading-none;
 }
 
-/* stylelint-disable-next-line */
 li.nav-current > a,
 .nav > li > a:hover,
 .footer .social-media a:hover,

@@ -132,13 +132,15 @@
     "build:zip": "zip -x 'node_modules/*' -x '.git/*' -x '*.zip' -x '.claude/*' -x '.idea/*' -x '.DS_Store' -x 'README.md' -r ghost-elleb-photography-theme .",
     "prod": "cross-env NODE_ENV=production vite build",
     "dev": "vite build --watch",
-    "lint:js": "standard src/js/**/*.ts",
-    "lint:css": "stylelint src/css/**/*.css",
+    "format": "biome format --write src/js/ src/css/pages",
+    "lint:js": "biome lint --write src/js/",
+    "lint:css": "biome lint --write src/css/pages",
     "lint": "yarn lint:js && yarn lint:css",
     "test": "yarn lint && gscan .",
     "scan": "gscan ."
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.2.6",
     "@tailwindcss/typography": "^0.5.4",
     "@types/node": "^20.0.0",
     "autoprefixer": "^10.4.8",
@@ -152,9 +154,6 @@
     "postcss-import": "^14.1.0",
     "postcss-nested": "^5.0.6",
     "precss": "^4.0.0",
-    "standard": "^17.0.0",
-    "stylelint": "^14.9.1",
-    "stylelint-config-recommended": "^8.0.0",
     "typescript": "^5.0.0",
     "vite": "^5.0.0"
   },

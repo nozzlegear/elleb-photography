@@ -17,7 +17,6 @@
   line-height: 1.625;
   padding-top: 6vmin;
 
-  /* stylelint-disable-next-line */
   & > * + * {
     margin-top: 4vmin;
     margin-bottom: 0;
@@ -55,12 +54,10 @@
     margin-top: 6vmin;
   }
 
-  /* stylelint-disable */
   & > hr + *,
   & > blockquote + * {
     margin-top: 6vmin !important;
   }
-  /* stylelint-enable */
 
   h1,
   h2,
