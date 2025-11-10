@@ -1,6 +1,10 @@
-import type { HttpTypes } from "@medusajs/types";
 import type { Sdk } from "./types";
 import { getMedusaConfig } from "./index";
+
+type InitiateCheckoutResponse = {
+    id: string;
+    url: string;
+}
 
 /**
  * Create a Stripe Checkout session and return the checkout URL
@@ -10,41 +14,23 @@ import { getMedusaConfig } from "./index";
  * 1. User clicks checkout button
  * 2. User is redirected to Stripe to enter payment details
  * 3. After payment, user is redirected back to the thank-you page
- * 4. The thank-you page completes the order placement using the Medusa SDK
- * 5. Store owner manually captures payment from Medusa admin later
  */
-export async function createStripeCheckoutSession(sdk: Sdk, cartId: string, successUrl: string, cancelUrl: string): Promise<string> {
-  // First, get the cart object (required for initiatePaymentSession)
-  const { cart } = await sdk.store.cart.retrieve(cartId);
-
-  // Initialize payment session with Stripe provider
-  // This creates the payment collection and initializes the payment session
-  const { payment_collection } = await sdk.store.payment.initiatePaymentSession(
-    cart,
-    {
-      provider_id: "pp_stripe_stripe", // Standard Stripe provider ID in Medusa
-      data: {}, // Additional data can be passed here if needed
-    }
-  );
-
+export async function createStripeCheckoutSession(sdk: Sdk, cartId: string): Promise<string> {
   // Get the Medusa configuration to access baseUrl and publishableKey
   const config = getMedusaConfig();
-  if (!config) {
+  if (!config)
     throw new Error('Medusa configuration not available');
-  }
 
   // Call our custom backend endpoint to create a Stripe Checkout Session
   // This endpoint is implemented at: /Users/nozzlegear/Repos/elleb-shop/src/api/store/custom/stripe-checkout
-  const checkoutResponse = await fetch(`${config.baseUrl}/store/custom/stripe-checkout`, {
+  const checkoutResponse = await sdk.client.fetch<Response>(`${config.baseUrl}/store/me/stripe-checkout`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'x-publishable-api-key': config.publishableKey,
+        "Accept": "application/json",
+        "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      payment_collection_id: payment_collection.id,
-      success_url: successUrl,
-      cancel_url: cancelUrl,
+        cart_id: cartId,
     }),
   });
 
@@ -53,52 +39,10 @@ export async function createStripeCheckoutSession(sdk: Sdk, cartId: string, succ
     throw new Error(`Failed to create Stripe checkout session: ${checkoutResponse.statusText} - ${errorText}`);
   }
 
-  const checkoutData = await checkoutResponse.json();
+  const checkoutData: InitiateCheckoutResponse = await checkoutResponse.json();
 
-  if (!checkoutData.url) {
+  if (!checkoutData.url)
     throw new Error('Checkout session URL not returned from server');
-  }
 
   return checkoutData.url;
-}
-
-/**
- * Complete the order after successful payment
- * This should be called on the thank-you page after Stripe redirects back
- *
- * This function is idempotent - it can be safely called multiple times
- * If the cart is already completed, it will return the existing order
- */
-export async function completeCart(sdk: Sdk, cartId: string): Promise<HttpTypes.StoreCompleteCartResponse> {
-  try {
-    const result = await sdk.store.cart.complete(cartId);
-    return result;
-  } catch (error: unknown) {
-    // If the cart was already completed (by webhook or previous call),
-    // Medusa may return a 409 conflict or similar error
-    // We should handle this gracefully
-    const errorWithStatus = error as { response?: { status?: number }; status?: number };
-    if (errorWithStatus?.response?.status === 409 || errorWithStatus?.status === 409) {
-      // Cart was already completed (409 Conflict).
-      // Since we can't retrieve the order from the completed cart,
-      // we re-throw the error and let the caller handle it
-      // (e.g., by checking session storage for cached order)
-      throw error;
-    }
-
-    console.error('Failed to complete cart:', error);
-    throw error;
-  }
-}
-
-/**
- * Verify that a Stripe checkout session was successful
- * This can be used on the thank-you page to confirm payment
- */
-export async function verifyStripeSession(sessionId: string, _stripePublishableKey: string): Promise<boolean> {
-  // Note: For security, session verification should ideally be done on the backend
-  // For now, we'll rely on Medusa's cart completion to verify payment
-  // The sessionId can be logged for reference
-  console.log('Stripe session ID:', sessionId);
-  return true;
 }

@@ -1,5 +1,4 @@
 import { configureSdk } from '../medusa/index';
-import { completeCart } from '../medusa/checkout';
 import type { StoreOrder, StoreCart } from '@medusajs/types';
 
 class ThankYouPage {
@@ -38,71 +37,7 @@ class ThankYouPage {
       return;
     }
 
-    // Complete the order
-    await this.completeOrder();
-  }
-
-  private async completeOrder() {
-    this.showLoading();
-
-    try {
-      // Get the cart ID from localStorage
-      const cartId = localStorage.getItem('MEDUSA_CART_TOKEN');
-
-      if (!cartId) {
-        // Cart has already been cleared (order was already completed)
-        // Try to retrieve order from session storage as fallback
-        const cachedOrder = sessionStorage.getItem('COMPLETED_ORDER');
-        if (cachedOrder) {
-          const order = JSON.parse(cachedOrder);
-          this.displayOrderSuccess(order);
-          return;
-        }
-
-        this.showError('Order information not found. Please check your email for order confirmation or contact support.');
-        return;
-      }
-
-      // Complete the cart to create an order
-      const result = await completeCart(this.sdk!, cartId);
-
-      if (result.type === 'order' && result.order) {
-        // Order was successfully created (or already existed)
-        const order = result.order;
-
-        // Cache the order in session storage for page refreshes
-        sessionStorage.setItem('COMPLETED_ORDER', JSON.stringify(order));
-
-        this.displayOrderSuccess(order);
-
-        // Clear the cart from localStorage so a new one will be created
-        localStorage.removeItem('MEDUSA_CART_TOKEN');
-      } else if (result.type === 'cart') {
-        // Cart completion failed - Medusa returned an error
-        // The error details are in result.error
-        console.error('Cart completion error:', result.error);
-        this.showError('Failed to complete your order. Please contact support with your payment confirmation.');
-      }
-    } catch (error: unknown) {
-      console.error('Failed to complete order:', error);
-
-      // Handle specific error cases
-      const errorWithMessage = error as { message?: string };
-      if (errorWithMessage?.message?.includes('already completed') || errorWithMessage?.message?.includes('409')) {
-        // Cart was already completed (likely by webhook or previous page load)
-        const cachedOrder = sessionStorage.getItem('COMPLETED_ORDER');
-        if (cachedOrder) {
-          const order = JSON.parse(cachedOrder);
-          this.displayOrderSuccess(order);
-          localStorage.removeItem('MEDUSA_CART_TOKEN');
-          return;
-        }
-
-        this.showError('Your order has been processed. Please check your email for confirmation or contact support if you need assistance.');
-      } else {
-        this.showError('An error occurred while processing your order. Please contact support with your payment confirmation.');
-      }
-    }
+    //this.displayOrderSuccess();
   }
 
   private displayOrderSuccess(order: StoreOrder | StoreCart) {

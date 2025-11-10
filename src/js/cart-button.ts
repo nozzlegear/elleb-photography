@@ -251,18 +251,8 @@ class CartButton {
     }
 
     try {
-      // Get the current page origin for success/cancel URLs
-      const origin = window.location.origin;
-      const successUrl = `${origin}/store/thank-you?session_id={CHECKOUT_SESSION_ID}`;
-      const cancelUrl = `${origin}/store/cart`;
-
       // Create Stripe checkout session and get the URL
-      const checkoutUrl = await createStripeCheckoutSession(
-        this.sdk,
-        this.cartId,
-        successUrl,
-        cancelUrl
-      );
+      const checkoutUrl = await createStripeCheckoutSession(this.sdk, this.cartId);
 
       // Redirect to Stripe checkout
       window.location.href = checkoutUrl;
