@@ -2,6 +2,7 @@ import { configureSdk } from './medusa/index';
 import { createOrRetrieveCartId, getCart, setItemQuantity } from './medusa/cart';
 import { createStripeCheckoutSession } from './medusa/checkout';
 import type { StoreCart, StoreCartLineItem } from '@medusajs/types';
+import { formatPrice } from './medusa/format-price';
 
 class CartButton {
   private sdk = configureSdk();
@@ -34,20 +35,22 @@ class CartButton {
 
     if (!this.button) return;
 
-    await this.loadCart();
+    const cart = await this.loadCart();
+
+    this.currency_code = cart.currency_code;
     this.attachEvents();
     this.updateDisplay();
   }
 
-  private async loadCart() {
-    if (!this.sdk) return;
+  private currency_code!: string;
 
-    try {
-      this.cartId = await createOrRetrieveCartId(this.sdk);
-      this.cart = await getCart(this.sdk, this.cartId);
-    } catch (error) {
-      console.error('Failed to load cart:', error);
-    }
+  private async loadCart() {
+    if (!this.sdk)
+      throw Error("SDK is null/undefined");
+
+    this.cartId = await createOrRetrieveCartId(this.sdk);
+    this.cart = await getCart(this.sdk, this.cartId);
+    return this.cart;
   }
 
   private attachEvents() {
@@ -130,7 +133,7 @@ class CartButton {
 
     // Render each cart item using the template
     this.cart.items.forEach(item => {
-      const itemElement = this.createCartItemElement(item);
+      const itemElement = this.createCartItemElement(item, this.currency_code);
       this.sidebarElements.cartList?.appendChild(itemElement);
     });
 
@@ -140,7 +143,7 @@ class CartButton {
     });
   }
 
-  private createCartItemElement(item: StoreCartLineItem): HTMLElement {
+  private createCartItemElement(item: StoreCartLineItem, currency_code: string): HTMLElement {
     const template = document.getElementById('cart-item-template') as HTMLTemplateElement;
     if (!template) {
       throw new Error('Cart item template not found');
@@ -153,7 +156,7 @@ class CartButton {
     const thumbnail = item.thumbnail ?? '/assets/img/placeholder.jpg';
     const title = item.title;
     const variantTitle = item.variant_title ?? '';
-    const price = item.unit_price.toFixed(2);
+    const price = formatPrice(item.unit_price, currency_code);
 
     // Set line item ID
     cartItemElement.dataset.lineItemId = item.id;

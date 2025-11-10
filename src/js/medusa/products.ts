@@ -1,9 +1,10 @@
 import type { Sdk, ProductMetaData } from "./types";
 import type { StoreProduct, StoreProductListResponse } from "@medusajs/types";
+import { formatPrice } from "./format-price";
 
 export async function listProducts(sdk: Sdk): Promise<StoreProductListResponse> {
   return await sdk.store.product.list({
-    fields: "*variants,*variants.prices,*options,*options.values"
+    fields: "*variants,*variants.calculated_price,*options,*options.values"
   });
 }
 
@@ -105,11 +106,8 @@ export async function renderProductsIntoTemplate(
       const defaultVariant = product.variants[0];
 
       // Set initial price
-      if (productPriceEl && defaultVariant.prices && defaultVariant.prices.length > 0) {
-        const price = defaultVariant.prices.find(p => p.currency_code === 'usd') || defaultVariant.prices[0];
-        if (price) {
-          productPriceEl.textContent = formatPrice(price.amount, price.currency_code);
-        }
+      if (productPriceEl && defaultVariant.calculated_price) {
+        productPriceEl.textContent = formatPrice(defaultVariant.calculated_price, "subtotal");
       }
 
       // Set up variant selection
@@ -144,22 +142,6 @@ function appendStarRating(ratingContainer: HTMLElement, product: StoreProduct): 
 
     ratingContainer.appendChild(starRating);
   }
-}
-
-function formatPrice(amount: number | string | null, currencyCode: string): string {
-  if (!amount) return '$0.00';
-
-  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-  const formattedAmount = numAmount.toFixed(2);
-
-  const currencySymbols: Record<string, string> = {
-    'usd': '$',
-    'eur': '€',
-    'gbp': '£',
-  };
-
-  const symbol = currencySymbols[currencyCode.toLowerCase()] || currencyCode.toUpperCase();
-  return `${symbol}${formattedAmount}`;
 }
 
 function setupVariantSelection(product: StoreProduct, variantsContainer: HTMLElement, priceElement: HTMLSpanElement | null) {
@@ -230,14 +212,11 @@ function updatePriceForSelectedVariant(product: StoreProduct, selectedOptions: R
     if (!variant.options) return false;
 
     return variant.options.every(variantOption => {
-      return selectedOptions[variantOption.option_id] === variantOption.value;
+      return selectedOptions[variantOption.option_id!] === variantOption.value;
     });
   });
 
-  if (matchingVariant?.prices && matchingVariant.prices.length > 0) {
-    const price = matchingVariant.prices.find(p => p.currency_code === 'usd') || matchingVariant.prices[0];
-    if (price) {
-      priceElement.textContent = formatPrice(price.amount, price.currency_code);
-    }
+  if (matchingVariant && matchingVariant.calculated_price) {
+    priceElement.textContent = formatPrice(matchingVariant.calculated_price, "subtotal");
   }
 }
