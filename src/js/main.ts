@@ -75,16 +75,21 @@ import 'lazysizes'
     })
 
     // Lightgallery
-    const lightGallery = document.querySelectorAll('.paway-light-gallery')
+    const lightGallery = document.querySelectorAll('.paway-light-gallery');
+    const postBody = document.querySelector<HTMLElement>('.post-body');
 
-    if (!lightGallery.length) return
+    if (!lightGallery.length)
+      return;
+
+    if (!postBody)
+      throw new Error("Could not find element .post-body for lightGallery");
 
     loadStyle('https://unpkg.com/lightgallery.js/dist/css/lightgallery.min.css')
 
     loadScript('https://cdn.jsdelivr.net/npm/lightgallery.js@1.1.3/dist/js/lightgallery.min.js', () => {
       loadScript('https://unpkg.com/lg-zoom.js@1.0.1/dist/lg-zoom.min.js')
 
-      window.lightGallery(document.querySelector('.post-body'), { selector: '.paway-light-gallery' })
+      window.lightGallery(postBody, { selector: '.paway-light-gallery' })
     })
   }
 

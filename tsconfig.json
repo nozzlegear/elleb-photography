@@ -23,7 +23,8 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.js"
+    "src/**/*.js",
+    "typings/global.d.ts"
   ],
   "exclude": [
     "node_modules",
