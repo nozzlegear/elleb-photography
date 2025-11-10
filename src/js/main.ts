@@ -3,14 +3,14 @@ import 'lazysizes'
 ((window, document) => {
   /* Load Script and Styles
   /* ---------------------------------------------------------- */
-  const loadScript = (src, callback) => {
+  const loadScript = (src: string, callback?: (this: HTMLScriptElement, event: Event) => void) => {
     const scriptElement = document.createElement('script')
     scriptElement.src = src
     callback && scriptElement.addEventListener('load', callback)
     document.body.appendChild(scriptElement)
   }
 
-  const loadStyle = href => {
+  const loadStyle = (href: string) => {
     const linkElement = document.createElement('link')
     linkElement.rel = 'stylesheet'
     linkElement.href = href
@@ -50,6 +50,8 @@ import 'lazysizes'
     $iframes.forEach(el => {
       const box = document.createElement('div')
       box.className = 'video-responsive'
+      if (!el.parentNode)
+        throw new Error(`parentNode of element does not exist`);
       el.parentNode.insertBefore(box, el)
       box.appendChild(el)
     })
@@ -61,13 +63,13 @@ import 'lazysizes'
   /* ---------------------------------------------------------- */
   const pawayGallery = () => {
     // <img> Set Atribute (data-src - data-sub-html)
-    document.querySelectorAll('.post-body img').forEach(el => {
+    document.querySelectorAll<HTMLImageElement>('.post-body img').forEach(el => {
       if (el.closest('a')) return
 
       el.classList.add('paway-light-gallery')
       el.setAttribute('data-src', el.src)
 
-      const nextElement = el.nextSibling
+      const nextElement = el.nextSibling as HTMLSpanElement;
 
       if (nextElement !== null && nextElement.nodeName.toLowerCase() === 'figcaption') {
         el.setAttribute('data-sub-html', nextElement.innerHTML)
@@ -98,8 +100,8 @@ import 'lazysizes'
   /* Post Share
   /* ---------------------------------------------------------- */
   const pawayShare = () => {
-    document.querySelectorAll('.js-share').forEach(item => {
-      item.addEventListener('click', e => {
+    document.querySelectorAll<HTMLAnchorElement>('.js-share').forEach(item => {
+      item.addEventListener('click', (e: MouseEvent) => {
         const width = 640
         const height = 400
 
@@ -111,10 +113,12 @@ import 'lazysizes'
 
         const left = ((containerWidth / 2) - (width / 2)) + dualScreenLeft
         const top = ((containerHeight / 2) - (height / 2)) + dualScreenTop
-        const newWindow = window.open(e.currentTarget.href, 'share-window', `scrollbars=yes, width=${width}, height=${height}, top=${top}, left=${left}`)
+
+        const target = e.currentTarget! as HTMLAnchorElement;
+        const newWindow = window.open(target.href, 'share-window', `scrollbars=yes, width=${width}, height=${height}, top=${top}, left=${left}`)
 
         // Puts focus on the newWindow
-        window.focus && newWindow.focus()
+        newWindow?.focus && newWindow.focus()
 
         e.preventDefault()
       })
