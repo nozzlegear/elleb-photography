@@ -127,7 +127,7 @@
     ]
   },
   "scripts": {
-    "build": "yarn run build:vite && yarn run build:zip",
+    "build": "npm run build:vite && npm run build:zip",
     "build:vite": "vite build",
     "build:zip": "zip -x 'node_modules/*' -x '.git/*' -x '*.zip' -x '.claude/*' -x '.idea/*' -x '.DS_Store' -x 'README.md' -r ghost-elleb-photography-theme .",
     "prod": "cross-env NODE_ENV=production vite build",
@@ -135,8 +135,8 @@
     "format": "biome format --write src/js/ src/css/pages",
     "lint:js": "biome lint --write src/js/",
     "lint:css": "biome lint --write src/css/pages",
-    "lint": "yarn lint:js && yarn lint:css",
-    "test": "yarn lint && gscan .",
+    "lint": "npm run lint:js && npm run lint:css",
+    "test": "npm lint && gscan .",
     "scan": "gscan ."
   },
   "devDependencies": {
