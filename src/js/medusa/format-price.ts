@@ -16,8 +16,13 @@ export function formatPrice(input: StoreProductVariant["calculated_price"] | num
         amount = input;
         currency = typeOrCurrency;
     } else {
-        amount = typeOrCurrency === "total" ? input.calculated_amount_with_tax! : input.calculated_amount_without_tax!;
-        currency = input.currency_code ?? "USD";
+      if (typeOrCurrency === "total") {
+        amount = input.calculated_amount_with_tax ?? input.calculated_amount!;
+      } else {
+        amount = input.calculated_amount_without_tax ?? input.original_amount!;
+      }
+
+      currency = input.currency_code ?? "USD";
     }
 
     return new Intl.NumberFormat("en-US", {
