@@ -28,9 +28,9 @@ export async function createStripeCheckoutSession(sdk: Sdk, cartId: string): Pro
         "Accept": "application/json",
         "Content-Type": "application/json",
     },
-    body: JSON.stringify({
+    body: {
         cart_id: cartId,
-    }),
+    },
   });
 
   if (!checkoutResponse.ok) {
