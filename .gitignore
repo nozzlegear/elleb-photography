@@ -40,3 +40,6 @@ changelog.md.bk
 .cache-loader
 yarn-error.log
 yarn.lock
+
+secrets.yaml
+secret.yaml
