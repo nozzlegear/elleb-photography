@@ -150,7 +150,7 @@ function setupVariantSelection(product: StoreProduct, variantsContainer: HTMLEle
   const selectedOptions: Record<string, string> = {};
 
   // Create option selectors
-  product.options.forEach(option => {
+  product.options.sort((l, r) => l.title.localeCompare(r.title)).forEach(option => {
     if (!option.values || option.values.length <= 1) return;
 
     const optionDiv = document.createElement('div');
