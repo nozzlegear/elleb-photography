@@ -22,8 +22,7 @@ export async function createStripeCheckoutSession(sdk: Sdk, cartId: string): Pro
     throw new Error('Medusa configuration not available');
 
   // Call our custom backend endpoint to create a Stripe Checkout Session
-  // This endpoint is implemented at: /Users/nozzlegear/Repos/elleb-shop/src/api/store/custom/stripe-checkout
-  const checkoutResponse = await sdk.client.fetch<Response>(`${config.baseUrl}/store/me/stripe-checkout`, {
+  const checkoutResponse = await sdk.client.fetch<Response>(`/stripe-checkout`, {
     method: 'POST',
     headers: {
         "Accept": "application/json",
