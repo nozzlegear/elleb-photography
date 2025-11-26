@@ -163,6 +163,7 @@
     "@medusajs/types": "2.11",
     "lazysizes": "^5.3.2",
     "normalize.css": "^8.0.1",
+    "preact": "^10.27.2",
     "tailwindcss": "^3.1.8"
   }
 }
