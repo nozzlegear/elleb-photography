@@ -87,6 +87,7 @@ export function ghostSveltePlugin(options = {}) {
 
         // Import the existing entry
         return `
+          import { mount } from "svelte";
           import Component from "${originalPath}";
 
           // Auto-instantiate on load
@@ -95,7 +96,7 @@ export function ghostSveltePlugin(options = {}) {
             const target = document.querySelector(targetTag);
 
             if (target) {
-              new Component({ target });
+              mount(Component, { target, props: {} });
             } else {
               console.warn('[Ghost Svelte] Target element <${kebabName}> not found');
             }
