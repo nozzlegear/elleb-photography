@@ -4,6 +4,8 @@
 
 This setup allows you to run Ghost locally for development with your theme files mounted directly from your repository.
 
+**Migration from Bitnami**: This configuration uses official Docker images (`docker.io/library/mysql` and `docker.io/library/ghost`) instead of Bitnami images, as Bitnami is no longer publishing hardened containers. Legacy Bitnami configuration files are kept for reference but updated to use official images.
+
 ### Key Components
 
 1. **Pkl Configuration Files** - Environment-specific configurations
