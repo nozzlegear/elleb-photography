@@ -104,7 +104,7 @@ export default defineConfig({
   },
   server: {
     watch: {
-      ignored: ['**/node_modules/**', '**/dist/**', '**/assets/**']
+      ignored: ['**/node_modules/**', '**/dist/**', '**/assets/**', '**/partials/**/*.hbs']
     }
   },
   plugins: [
@@ -148,22 +148,30 @@ export default defineConfig({
     },
     {
       name: 'create-hbs-styles',
-      closeBundle() {
+      async closeBundle() {
         // Create HBS style files after build
 
-        const createHbsFile = (cssPath, outputPath) => {
+        const createHbsFile = async (cssPath, outputPath) => {
           if (fs.existsSync(cssPath)) {
             let css = fs.readFileSync(cssPath, 'utf8')
             css = css.replace('@charset "UTF-8";', '')
 
-            postcss([
+            const result = await postcss([
               cssnano(),
               postcssDiscardComments({ removeAll: true })
             ])
             .process(css, { from: undefined })
-            .then(result => {
-              fs.writeFileSync(outputPath, result.css)
-            })
+
+            // Only write if content has changed to prevent infinite rebuild loops
+            const newContent = result.css
+            let existingContent = ''
+            if (fs.existsSync(outputPath)) {
+              existingContent = fs.readFileSync(outputPath, 'utf8')
+            }
+
+            if (newContent !== existingContent) {
+              fs.writeFileSync(outputPath, newContent)
+            }
           }
         }
 
@@ -175,8 +183,8 @@ export default defineConfig({
           fs.mkdirSync('./partials/amp', { recursive: true })
         }
 
-        createHbsFile('./assets/styles/css/main.css', './partials/main-styles.hbs')
-        createHbsFile('./assets/styles/css/amp.css', './partials/amp/amp-styles.hbs')
+        await createHbsFile('./assets/styles/css/main.css', './partials/main-styles.hbs')
+        await createHbsFile('./assets/styles/css/amp.css', './partials/amp/amp-styles.hbs')
       }
     }
   ]
