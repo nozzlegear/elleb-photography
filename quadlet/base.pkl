@@ -9,6 +9,9 @@ class Environment {
   /// Host path for the Ghost theme (only used in dev)
   themeHostPath: String?
 
+  /// Host path for Ghost config file (only used in dev)
+  configFilePath: String?
+
   /// Theme name to use in the container
   themeName: String = "elleb-photos"
 
@@ -57,7 +60,7 @@ function dbContainer() = new {
   volumeMounts = new Listing {
     new {
       name = "db"
-      mountPath = "/bitnami/mysql"
+      mountPath = "/var/lib/mysql"
     }
     new {
       name = "mysql-password"
@@ -164,6 +167,15 @@ function siteContainer() = new {
         mountPath = "/var/lib/ghost/content/themes/\(environment.themeName)"
       }
     }
+    // Add config file mount in dev mode
+    when (environment.isDev && environment.configFilePath != null) {
+      new {
+        name = "config"
+        mountPath = "/var/lib/ghost/config.\(environment.nodeEnv).json"
+        subPath = "ghost-config.\(environment.nodeEnv).json"
+        readOnly = true
+      }
+    }
   }
 }
 
@@ -211,6 +223,16 @@ function volumes() = new Listing {
       name = "theme"
       hostPath = new {
         path = environment.themeHostPath
+        type = "Directory"
+      }
+    }
+  }
+  // Add config file volume in dev mode
+  when (environment.isDev && environment.configFilePath != null) {
+    new {
+      name = "config"
+      hostPath = new {
+        path = environment.configFilePath
         type = "Directory"
       }
     }
