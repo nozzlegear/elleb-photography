@@ -1,7 +1,12 @@
-.sidenav {
-  max-width: 460px;
-  text-align: left;
-  box-shadow: -24px 0 48px rgba(0, 0, 0, .6);
+body {
+  .sidenav {
+    max-width: 460px;
+    text-align: left;
+  }
+
+  &.has-sidenav .sidenav {
+    box-shadow: -24px 0 48px rgba(0, 0, 0, .6);
+  }
 }
 
 .brand {
