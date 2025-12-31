@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
 import { readFileSync } from 'fs'
+import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { ghostSveltePlugin } from './vite-plugin-ghost-svelte.mjs';
 import fs from 'fs'
 import path from 'path'
 import postcss from 'postcss'
@@ -23,6 +25,16 @@ const getEntries = (entryPoints) => entryPoints.reduce((entries, file) => {
     return entries;
 }, {});
 
+// Get the rollup input config to check if entries are Svelte files
+const inputConfig = getEntries([
+  'js/main.ts',
+  'js/pages/products.ts',
+  'js/cart-sidebar.svelte',
+  'css/main.css',
+  'css/amp.css',
+  'css/pages/store.css',
+]);
+
 const BuildComments = `/*!
  * ${name} v${version}
  * Copyright ${new Date().getFullYear()} ${author.name} <${author.email}> (${repository.url})
@@ -35,21 +47,22 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       external: [],
-      input: getEntries([
-        'js/main.ts',
-        'js/cart-button.ts',
-        'js/pages/products.ts',
-        'css/main.css',
-        'css/amp.css',
-        'css/pages/store.css',
-      ]),
+      input: inputConfig,
       output: {
         banner: BuildComments,
         dir: 'assets',
         entryFileNames: (chunkInfo) => {
-          if (chunkInfo.name === 'main') {
-            return 'scripts/[name].js'
+          // Check if this entry was originally a .svelte file
+          const entryKey = Object.keys(inputConfig).find(key => {
+            const normalizedFacadeModuleId = chunkInfo.facadeModuleId?.replace(/\\/g, '/');
+            return normalizedFacadeModuleId?.includes(key);
+          });
+
+          if (entryKey && inputConfig[entryKey].endsWith('.svelte')) {
+            // Output Svelte files as .svelte.js
+            return '[name].svelte.js';
           }
+
           return '[name].js'
         },
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -95,6 +108,18 @@ export default defineConfig({
     }
   },
   plugins: [
+    svelte({
+       configFile: path.resolve(__dirname, "./svelte.config.mjs"),
+       compilerOptions: {
+           runes: true,
+           experimental: {
+             async: true,
+           }
+       },
+    }),
+    ghostSveltePlugin({
+        extension: '.svelte-loader.js'
+    }),
     {
       name: 'copy-images',
       generateBundle() {

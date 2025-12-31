@@ -7,7 +7,6 @@
     "allowJs": true,
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
@@ -17,18 +16,22 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+
+    /* Svelte Config */
+    "skipLibCheck": true,
+    /**
+     * Svelte Preprocess cannot figure out whether you have a value or a type, so tell TypeScript
+     * to enforce using `import type` instead of `import` for Types.
+     */
+    "verbatimModuleSyntax": true,
+    "sourceMap": true
   },
   "include": [
     "src/**/*.ts",
+    "src/**/*.svelte",
     "src/**/*.js",
-    "typings/global.d.ts"
+    "typings/global.d.ts",
+    "node_modules/vite/client.d.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "assets"
-  ]
+  "exclude": ["node_modules", "dist", "assets"]
 }
