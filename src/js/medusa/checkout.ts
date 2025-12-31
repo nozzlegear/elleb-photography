@@ -1,5 +1,5 @@
+import type { FetchError } from "@medusajs/js-sdk";
 import type { Sdk } from "./types";
-import { getMedusaConfig } from "./index";
 
 type InitiateCheckoutResponse = {
     id: string;
@@ -16,32 +16,28 @@ type InitiateCheckoutResponse = {
  * 3. After payment, user is redirected back to the thank-you page
  */
 export async function createStripeCheckoutSession(sdk: Sdk, cartId: string): Promise<string> {
-  // Get the Medusa configuration to access baseUrl and publishableKey
-  const config = getMedusaConfig();
-  if (!config)
-    throw new Error('Medusa configuration not available');
-
   // Call our custom backend endpoint to create a Stripe Checkout Session
-  const checkoutResponse = await sdk.client.fetch<Response>(`/stripe-checkout`, {
-    method: 'POST',
-    headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-    },
-    body: {
-        cart_id: cartId,
-    },
-  });
+  let checkoutResponse: InitiateCheckoutResponse;
 
-  if (!checkoutResponse.ok) {
-    const errorText = await checkoutResponse.text();
-    throw new Error(`Failed to create Stripe checkout session: ${checkoutResponse.statusText} - ${errorText}`);
+  try {
+      checkoutResponse = await sdk.client.fetch<InitiateCheckoutResponse>(`/stripe-checkout`, {
+        method: 'POST',
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        body: {
+            cart_id: cartId,
+        },
+      });
+  } catch (e: any) {
+    const err: FetchError = e;
+    throw new Error(`Failed to create Stripe checkout session: ${err.status} ${err.statusText} - ${err.message}`);
   }
 
-  const checkoutData: InitiateCheckoutResponse = await checkoutResponse.json();
-
-  if (!checkoutData.url)
+  if (!checkoutResponse.url)
     throw new Error('Checkout session URL not returned from server');
 
-  return checkoutData.url;
+  return checkoutResponse.url;
 }
+
