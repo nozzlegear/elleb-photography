@@ -1,0 +1,51 @@
+/// Quadlet systemd unit file configuration
+module quadlet
+
+/// Generate a Quadlet Kube unit file
+class KubeUnit {
+  /// Unit name (without .kube extension)
+  name: String
+
+  /// Description for the service
+  description: String
+
+  /// Path to the Kubernetes YAML file (relative to quadlet directory)
+  yamlFile: String
+
+  /// Whether to enable automatic updates from registry
+  autoUpdate: Boolean = true
+
+  /// Generate the .kube unit file content
+  function generate(): String =
+    """
+    [Unit]
+    Description=\(description)
+    After=network-online.target
+    Wants=network-online.target
+
+    [Kube]
+    Yaml=\(yamlFile)
+    \(if (autoUpdate) "AutoUpdate=registry" else "")
+
+    [Service]
+    Restart=always
+
+    [Install]
+    WantedBy=multi-user.target default.target
+    """
+}
+
+/// Generate a Quadlet Volume unit file
+class VolumeUnit {
+  /// Volume name (without .volume extension)
+  name: String
+
+  /// Optional volume driver
+  driver: String?
+
+  /// Optional volume labels
+  labels: Map<String, String>?
+
+  /// Generate the .volume unit file content
+  function generate(): String = "[Volume]\n"
+}

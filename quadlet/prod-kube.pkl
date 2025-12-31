@@ -1,0 +1,15 @@
+/// Production Quadlet Kube unit file generator
+module prodkube
+
+import "quadlet.pkl"
+
+local kubeUnit: quadlet.KubeUnit = new {
+  name = "ellebphotos"
+  description = "Elleb Photos Ghost Site"
+  yamlFile = "prod.yaml"
+  autoUpdate = true
+}
+
+output {
+  text = kubeUnit.generate()
+}
