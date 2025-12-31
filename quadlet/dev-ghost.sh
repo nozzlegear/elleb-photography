@@ -13,15 +13,16 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 print_usage() {
-    echo "Usage: $0 {start|stop|restart|logs|status|regenerate}"
+    echo "Usage: $0 {start|stop|restart|logs|status|regenerate|regenerate-prod}"
     echo ""
     echo "Commands:"
-    echo "  start       - Start the Ghost development container"
-    echo "  stop        - Stop the Ghost development container"
-    echo "  restart     - Restart the Ghost development container"
-    echo "  logs        - Show logs from the Ghost container"
-    echo "  status      - Show container status"
-    echo "  regenerate  - Regenerate dev.yaml from dev.pkl"
+    echo "  start           - Start the Ghost development container"
+    echo "  stop            - Stop the Ghost development container"
+    echo "  restart         - Restart the Ghost development container"
+    echo "  logs            - Show logs from the Ghost container"
+    echo "  status          - Show container status"
+    echo "  regenerate      - Regenerate dev.yaml from dev.pkl"
+    echo "  regenerate-prod - Regenerate production files from Pkl"
     exit 1
 }
 
@@ -106,6 +107,16 @@ regenerate_yaml() {
     echo -e "${GREEN}✓ dev.yaml regenerated${NC}"
 }
 
+regenerate_prod() {
+    echo "Regenerating production files from Pkl..."
+    cd "$SCRIPT_DIR"
+    pkl eval -f yaml prod.pkl -o prod.yaml
+    pkl eval prod-kube.pkl -o ellebphotos-prod.kube
+    echo -e "${GREEN}✓ Production files regenerated:${NC}"
+    echo "  - prod.yaml"
+    echo "  - ellebphotos-prod.kube"
+}
+
 # Main command processing
 case "${1:-}" in
     start)
@@ -125,6 +136,9 @@ case "${1:-}" in
         ;;
     regenerate)
         regenerate_yaml
+        ;;
+    regenerate-prod)
+        regenerate_prod
         ;;
     *)
         print_usage
