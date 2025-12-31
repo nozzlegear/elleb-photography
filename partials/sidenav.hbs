@@ -21,31 +21,7 @@
     {{/get}}
 
     {{!-- Cart Section --}}
-    <div class="cart-sidebar">
-        <header class="cart-header">
-            <h3>Shopping Cart</h3>
-        </header>
-
-        <div class="cart-items">
-            <div class="cart-empty" hidden>
-                <p>Your cart is empty</p>
-            </div>
-            <div class="cart-list" style="display: none;">
-                <!-- Cart items will be populated here by JavaScript -->
-            </div>
-        </div>
-    </div>
-
-    <footer class="cart-footer">
-        <div class="cart-subtotal" aria-live="polite" aria-atomic="true">
-            <span>Subtotal</span>
-            <span class="cart-total-amount">$0.00</span>
-        </div>
-        <p class="cart-note">Shipping &amp; taxes calculated at checkout</p>
-        <button class="checkout-button" style="display: none;">
-            Checkout
-        </button>
-    </footer>
+    <cart-sidebar></cart-sidebar>
 
     <div class="flex-auto"></div>
 
@@ -59,6 +35,3 @@
     {{!-- social Media --}}
     {{> "widget/witget-social-media"}}
 </div>
-
-{{!-- Cart Item Template --}}
-{{> "cart-item-template"}}
