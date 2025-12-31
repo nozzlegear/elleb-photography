@@ -6,8 +6,9 @@ extends "base.pkl"
 const environment: Environment = new Environment {
   isDev = true
   themeHostPath = "/Users/nozzlegear/Repos/elleb-photos-ghost"
+  configFilePath = "/Users/nozzlegear/Repos/elleb-photos-ghost"
   themeName = "elleb-photos"
   hostPort = 3050
-  ghostUrl = "http://localhost:3050"
+  ghostUrl = "https://nozzlegear.ngrok.io"
   nodeEnv = "development"
 }
