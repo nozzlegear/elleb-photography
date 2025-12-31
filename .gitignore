@@ -11,7 +11,7 @@ b-cov
 *.html
 *.map
 *.vscode
-
+.pkl-lsp
 
 pids
 logs
@@ -43,3 +43,11 @@ yarn.lock
 
 secrets.yaml
 secret.yaml
+
+ghost-config.*.json
+
+# Pkl-generated files in quadlet folder
+quadlet/dev.yaml
+quadlet/prod.yaml
+quadlet/*.kube
+quadlet/*.volume
