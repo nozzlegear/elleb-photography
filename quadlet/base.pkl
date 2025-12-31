@@ -1,0 +1,240 @@
+/// Base configuration for Ghost container deployment
+open module base
+
+/// Environment type
+class Environment {
+  /// Whether this is a development environment
+  isDev: Boolean
+
+  /// Host path for the Ghost theme (only used in dev)
+  themeHostPath: String?
+
+  /// Theme name to use in the container
+  themeName: String = "elleb-photos"
+
+  /// Port to expose on the host
+  hostPort: UInt16
+
+  /// Ghost URL
+  ghostUrl: String
+
+  /// Node environment
+  nodeEnv: String
+}
+
+/// Configuration values
+const environment: Environment
+
+/// MySQL configuration
+const mysqlUser: String = "ellebphotos"
+const mysqlDatabase: String = "ellebphotos_ghost"
+const mysqlImage: String = "docker.io/library/mysql:9.5.0@sha256:569c4128dfa625ac2ac62cdd8af588a3a6a60a049d1a8d8f0fac95880ecdbbe5"
+const ghostImage: String = "docker.io/library/ghost:6.7.0-bookworm"
+const secretName: String = "elleb_photos_secrets"
+
+/// Generate the database container spec
+function dbContainer() = new {
+  name = "db"
+  image = mysqlImage
+  env = new Listing {
+    new {
+      name = "MYSQL_USER"
+      value = mysqlUser
+    }
+    new {
+      name = "MYSQL_DATABASE"
+      value = mysqlDatabase
+    }
+    new {
+      name = "MYSQL_PASSWORD_FILE"
+      value = "/run/secrets/MYSQL_PASSWORD"
+    }
+    new {
+      name = "MYSQL_ROOT_PASSWORD_FILE"
+      value = "/run/secrets/MYSQL_ROOT_PASSWORD"
+    }
+  }
+  volumeMounts = new Listing {
+    new {
+      name = "db"
+      mountPath = "/bitnami/mysql"
+    }
+    new {
+      name = "mysql-password"
+      mountPath = "/run/secrets/MYSQL_PASSWORD"
+      subPath = "MYSQL_PASSWORD"
+      readOnly = true
+    }
+    new {
+      name = "mysql-root-password"
+      mountPath = "/run/secrets/MYSQL_ROOT_PASSWORD"
+      subPath = "MYSQL_ROOT_PASSWORD"
+      readOnly = true
+    }
+  }
+  livenessProbe = new {
+    exec = new {
+      command = new Listing {
+        "mysqladmin"
+        "ping"
+        "-h"
+        "localhost"
+        "-u"
+        "root"
+        "-pexample"
+      }
+    }
+    initialDelaySeconds = 10
+    periodSeconds = 10
+    timeoutSeconds = 5
+    failureThreshold = 10
+  }
+}
+
+/// Generate the Ghost site container spec
+function siteContainer() = new {
+  name = "site"
+  image = ghostImage
+  env = new Listing {
+    new {
+      name = "NODE_ENV"
+      value = environment.nodeEnv
+    }
+    new {
+      name = "url"
+      value = environment.ghostUrl
+    }
+    new {
+      name = "database__client"
+      value = "mysql"
+    }
+    new {
+      name = "database__connection__host"
+      value = "localhost"
+    }
+    new {
+      name = "database__connection__database"
+      value = mysqlDatabase
+    }
+    new {
+      name = "database__connection__user"
+      value = mysqlUser
+    }
+    new {
+      name = "database__connection__password"
+      valueFrom = new {
+        secretKeyRef = new {
+          name = secretName
+          key = "MYSQL_PASSWORD"
+        }
+      }
+    }
+    new {
+      name = "privacy__useUpdateCheck"
+      value = "false"
+    }
+    new {
+      name = "privacy__useGravatar"
+      value = "false"
+    }
+    new {
+      name = "privacy__useRpcPing"
+      value = "true"
+    }
+    new {
+      name = "privacy__useStructuredData"
+      value = "true"
+    }
+  }
+  ports = new Listing {
+    new {
+      containerPort = 2368
+      hostPort = environment.hostPort
+    }
+  }
+  volumeMounts = new Listing {
+    new {
+      name = "ghost"
+      mountPath = "/var/lib/ghost/content"
+    }
+    // Add theme mount in dev mode
+    when (environment.isDev && environment.themeHostPath != null) {
+      new {
+        name = "theme"
+        mountPath = "/var/lib/ghost/content/themes/\(environment.themeName)"
+      }
+    }
+  }
+}
+
+/// Generate volumes
+function volumes() = new Listing {
+  new {
+    name = "db"
+    persistentVolumeClaim = new {
+      claimName = "ellebphotos_db"
+    }
+  }
+  new {
+    name = "ghost"
+    persistentVolumeClaim = new {
+      claimName = "ellebphotos_ghost"
+    }
+  }
+  new {
+    name = "mysql-password"
+    secret = new {
+      ["secretName"] = secretName
+      items = new Listing {
+        new {
+          key = "MYSQL_PASSWORD"
+          path = "MYSQL_PASSWORD"
+        }
+      }
+    }
+  }
+  new {
+    name = "mysql-root-password"
+    secret = new {
+      ["secretName"] = secretName
+      items = new Listing {
+        new {
+          key = "MYSQL_ROOT_PASSWORD"
+          path = "MYSQL_ROOT_PASSWORD"
+        }
+      }
+    }
+  }
+  // Add theme volume in dev mode
+  when (environment.isDev && environment.themeHostPath != null) {
+    new {
+      name = "theme"
+      hostPath = new {
+        path = environment.themeHostPath
+        type = "Directory"
+      }
+    }
+  }
+}
+
+/// Generate the complete Pod spec
+output {
+  value = new {
+    apiVersion = "v1"
+    kind = "Pod"
+    metadata = new {
+      name = "ellebphotos"
+      labels = new {
+        ["app"] = "ellebphotos"
+      }
+    }
+    spec = new {
+      containers = new Listing {
+        dbContainer()
+        siteContainer()
+      }
+      volumes = volumes()
+    }
+  }
+  renderer = new YamlRenderer {}
+}

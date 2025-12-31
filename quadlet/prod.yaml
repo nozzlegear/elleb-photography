@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ellebphotos
+  labels:
+    app: ellebphotos
+spec:
+  containers:
+  - name: db
+    image: docker.io/library/mysql:9.5.0@sha256:569c4128dfa625ac2ac62cdd8af588a3a6a60a049d1a8d8f0fac95880ecdbbe5
+    env:
+    - name: MYSQL_USER
+      value: ellebphotos
+    - name: MYSQL_DATABASE
+      value: ellebphotos_ghost
+    - name: MYSQL_PASSWORD_FILE
+      value: /run/secrets/MYSQL_PASSWORD
+    - name: MYSQL_ROOT_PASSWORD_FILE
+      value: /run/secrets/MYSQL_ROOT_PASSWORD
+    volumeMounts:
+    - name: db
+      mountPath: /bitnami/mysql
+    - name: mysql-password
+      mountPath: /run/secrets/MYSQL_PASSWORD
+      subPath: MYSQL_PASSWORD
+      readOnly: true
+    - name: mysql-root-password
+      mountPath: /run/secrets/MYSQL_ROOT_PASSWORD
+      subPath: MYSQL_ROOT_PASSWORD
+      readOnly: true
+    livenessProbe:
+      exec:
+        command:
+        - mysqladmin
+        - ping
+        - -h
+        - localhost
+        - -u
+        - root
+        - -pexample
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 10
+  - name: site
+    image: docker.io/library/ghost:6.7.0-bookworm
+    env:
+    - name: NODE_ENV
+      value: production
+    - name: url
+      value: https://www.elleb.photography
+    - name: database__client
+      value: mysql
+    - name: database__connection__host
+      value: localhost
+    - name: database__connection__database
+      value: ellebphotos_ghost
+    - name: database__connection__user
+      value: ellebphotos
+    - name: database__connection__password
+      valueFrom:
+        secretKeyRef:
+          name: elleb_photos_secrets
+          key: MYSQL_PASSWORD
+    - name: privacy__useUpdateCheck
+      value: 'false'
+    - name: privacy__useGravatar
+      value: 'false'
+    - name: privacy__useRpcPing
+      value: 'true'
+    - name: privacy__useStructuredData
+      value: 'true'
+    ports:
+    - containerPort: 2368
+      hostPort: 3050
+    volumeMounts:
+    - name: ghost
+      mountPath: /var/lib/ghost/content
+  volumes:
+  - name: db
+    persistentVolumeClaim:
+      claimName: ellebphotos_db
+  - name: ghost
+    persistentVolumeClaim:
+      claimName: ellebphotos_ghost
+  - name: mysql-password
+    secret:
+      items:
+      - key: MYSQL_PASSWORD
+        path: MYSQL_PASSWORD
+      secretName: elleb_photos_secrets
+  - name: mysql-root-password
+    secret:
+      items:
+      - key: MYSQL_ROOT_PASSWORD
+        path: MYSQL_ROOT_PASSWORD
+      secretName: elleb_photos_secrets

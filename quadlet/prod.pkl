@@ -1,0 +1,13 @@
+/// Production environment configuration
+module prod
+
+extends "base.pkl"
+
+const environment: Environment = new Environment {
+  isDev = false
+  themeHostPath = null
+  themeName = "elleb-photos"
+  hostPort = 3050
+  ghostUrl = "https://www.elleb.photography"
+  nodeEnv = "production"
+}
