@@ -3,7 +3,7 @@
         {{!-- Logo --}}
         <div class="logo flex flex-grow items-center">
             {{#if @site.logo}}
-                <a class="logo-link-img h-8 md:h-10" href="{{@site.url}}"><img class="logo-img h-full" src="{{img_url @site.logo size="m"}}" alt="{{@site.title}}"/></a>
+                <a class="logo-link-img" href="{{@site.url}}"><img class="logo-img h-full" src="{{img_url @site.logo size="m"}}" alt="{{@site.title}}"/></a>
             {{else}}
                 <a class="logo-link" href="{{@site.url}}"><span class="logo-txt text-4xl font-bold text-black leading-none">{{@site.title}}</span></a>
             {{/if}}

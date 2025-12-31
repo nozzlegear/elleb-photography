@@ -21,3 +21,21 @@ li.nav-current > a,
 .social-media a :hover {
   @apply text-primary;
 }
+
+img.logo-img.h-full {
+  width: auto;
+  max-height: 70px;
+  max-width: 200px;
+
+  @media (max-width:767px) {
+      max-height: 60px;
+  }
+}
+
+@media (max-width: 450px) {
+  /** Hide the navbar's Subscribe/Account buttons on small phones (e.g. iPhone SE, iPhone 17 base model) */
+    li:has(a[data-portal="signup"]),
+    li:has(a[data-portal="account"]) {
+        display:none;
+    }
+}
