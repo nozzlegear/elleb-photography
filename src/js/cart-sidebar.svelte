@@ -1,35 +1,34 @@
 <script lang="ts">
   import type { StoreCart } from "@medusajs/types";
   import { configureSdk } from "./medusa"
-  import { createOrRetrieveCartId, getCart, setItemQuantity } from "./medusa/cart";
+  import { createOrRetrieveCart, setItemQuantity } from "./medusa/cart";
   import { createStripeCheckoutSession } from "./medusa/checkout";
   import { formatPrice } from "./medusa/format-price";
 
-  let loading = $state(false);
+  type LoadingState =
+    | { type: "loading" }
+    | { type: "error", message: string }
+    | { type: "done" };
+
+  let loading = $state<LoadingState>({type: "loading"});
 
   // Load the cart
   const sdk = configureSdk()!;
 
   // These values may change, as the cart id needs to be reset after the cart has been purchased
-  let cartId = $state<string | null>(null);
   let cart = $state<StoreCart | null>(null);
 
   // Create a promise for initial cart loading
-  const cartPromise = createOrRetrieveCartId(sdk).then(async (id) => {
-    cartId = id;
-    cart = await getCart(sdk, id);
-    loading = false;
-    return cart;
+  const cartPromise = createOrRetrieveCart(sdk).then(async (userCart) => {
+    cart = userCart;
+    loading = {type: "done"};
+    return userCart;
   });
 
   const currencyCode = $derived(cart?.currency_code);
   const cartTotal = $derived<number>(cart?.total ?? 0);
   const cartEmpty = $derived(Array.isArray(cart?.items) ? cart.items.length === 0 : true);
   // let itemCount = $derived(cart.items?.reduce((total, item) => total + item.quantity, 0) ?? 0)
-
-  function openSidebar() {
-    document.body.classList.add('has-sidenav');
-  }
 
   $effect(() => {
     window.addEventListener("cart-updated", refreshCart);
@@ -40,25 +39,33 @@
   });
 
   async function handleCheckout() {
-    if (!sdk || !cartId) {
-      console.error('SDK or cart ID not available');
+    if (loading.type === "loading")
+      return;
+    if (!sdk) {
+      console.error('SDK not configured.');
+      return;
+    }
+    if (!cart) {
+      console.error("Cart has not yet loaded.");
       return;
     }
 
     // Show loading state
-    loading = true;
+    loading = {type: "loading"};
 
     try {
       // Create Stripe checkout session and get the URL
-      const checkoutUrl = await createStripeCheckoutSession(sdk, cartId);
+      const checkoutUrl = await createStripeCheckoutSession(sdk, cart.id);
 
       // Redirect to Stripe checkout
       window.location.assign(checkoutUrl);
+      loading = { type: "done" };
     } catch (error) {
       console.error('Failed to initiate checkout:', error);
-      alert('Failed to start checkout. Please try again.');
-    } finally {
-      loading = false;
+      loading = {
+        type: "error",
+        message: "Failed to start checkout. Please try again."
+      }
     }
   }
 
@@ -71,17 +78,18 @@
     }
 
     const evt = event satisfies CustomEvent<StoreCart>;
-
-    cartId = evt.detail.id;
     cart = evt.detail
   }
 
   async function handleQuantityChange(action: "increase" | "decrease" | "remove", lineItemId: string) {
-    if (loading)
+    if (loading.type === "loading")
       return;
-
-    if (!sdk || !cartId) {
-      console.error("sdk or cartId values are not set", { sdk, cartId });
+    if (!sdk) {
+      console.error('SDK not configured.');
+      return;
+    }
+    if (!cart) {
+      console.error("Cart has not yet loaded.");
       return;
     }
 
@@ -101,15 +109,18 @@
     }
 
     try {
-      loading = true;
-      cart = await setItemQuantity(sdk, cartId, lineItemId, newQuantity);
+      loading = {type: "loading"};
+      cart = await setItemQuantity(sdk, cart.id, lineItemId, newQuantity);
 
       // Dispatch event for other components
       window.dispatchEvent(new CustomEvent('cart-updated', { detail: cart }));
+      loading = { type: "done" };
     } catch (error) {
       console.error('Failed to update item quantity:', error);
-    } finally {
-      loading = false;
+      loading = {
+        type: "error",
+        message: "Failed to update item quantity, please try again."
+      }
     }
   }
 </script>
@@ -159,19 +170,19 @@
                              type="button"
                              class="quantity-btn quantity-decrease"
                              aria-label="Decrease quantity"
-                             disabled={loading}
+                             disabled={loading.type === "loading"}
                              onclick={() => handleQuantityChange("decrease", item.id)}>-</button>
                             <span class="quantity-display" aria-live="polite">{item.quantity}</span>
                             <button
                                 type="button"
                                 class="quantity-btn quantity-increase"
                                 aria-label="Increase quantity"
-                                disabled={loading}
+                                disabled={loading.type === "loading"}
                                 onclick={() => handleQuantityChange("increase", item.id)}>+</button>
                         </div>
                     </div>
                     <div class="cart-item-remove">
-                      <button class="cart-item-remove-btn" type="button" disabled={loading} onclick={() => handleQuantityChange("remove", item.id)}>Remove</button>
+                      <button class="cart-item-remove-btn" type="button" disabled={loading.type === "loading"} onclick={() => handleQuantityChange("remove", item.id)}>Remove</button>
                     </div>
                     <div class="cart-item-price" aria-live="polite" aria-atomic="true">
                       {#if item.unit_price && currencyCode}
@@ -190,8 +201,13 @@
             <span class="cart-total-amount">{currencyCode ? formatPrice(cartTotal, currencyCode) : '$0.00'}</span>
         </div>
         <p class="cart-note">Shipping &amp; taxes calculated at checkout</p>
-        <button class="checkout-button" class:cart-button--empty={cartEmpty} disabled={loading} onclick={handleCheckout}>
-          {#if loading }
+        {#if loading.type === "error"}
+          <p>Error:</p>
+          <code><pre>{loading.message}</pre></code>
+          <button onclick={() => window.location.reload()}>Try again</button>
+        {/if}
+        <button class="checkout-button" class:cart-button--empty={cartEmpty} disabled={loading.type === "loading"} onclick={handleCheckout}>
+          {#if loading.type === "loading" }
             Loading
           {:else}
             Checkout

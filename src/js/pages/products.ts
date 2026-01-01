@@ -1,6 +1,6 @@
 import * as products from "../medusa/products";
 import { configureSdk } from "../medusa/index";
-import { createOrRetrieveCartId, addItemToCart } from "../medusa/cart";
+import { createOrRetrieveCart, addItemToCart } from "../medusa/cart";
 import type { StoreProduct } from "@medusajs/types";
 
 const sdk = configureSdk();
@@ -26,7 +26,7 @@ async function handleProductClick(this: HTMLAnchorElement, product: StoreProduct
   }
 
   try {
-    const cartId = await createOrRetrieveCartId(sdk);
+    const cart = await createOrRetrieveCart(sdk);
     const defaultVariant = product.variants?.[0];
 
     if (!defaultVariant) {
@@ -41,7 +41,7 @@ async function handleProductClick(this: HTMLAnchorElement, product: StoreProduct
       buttonText.textContent = 'Adding...';
     }
 
-    const updatedCart = await addItemToCart(sdk, cartId, defaultVariant.id);
+    const updatedCart = await addItemToCart(sdk, cart.id, defaultVariant.id);
 
     // Dispatch cart updated event
     window.dispatchEvent(new CustomEvent('cart-updated', { detail: updatedCart }));
