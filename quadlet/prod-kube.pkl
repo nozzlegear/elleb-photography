@@ -3,9 +3,12 @@ module prodkube
 
 import "quadlet.pkl"
 
+// Configure your instance name here (should match prod.pkl instanceName)
+local instanceName: String = "ellebphotos"
+
 local kubeUnit: quadlet.KubeUnit = new {
-  name = "ellebphotos"
-  description = "Elleb Photos Ghost Site"
+  name = instanceName
+  description = "Ghost Site - \(instanceName)"
   yamlFile = "prod.yaml"
   autoUpdate = true
 }

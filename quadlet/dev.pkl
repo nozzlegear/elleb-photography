@@ -11,4 +11,11 @@ const environment: Environment = new Environment {
   hostPort = 3050
   ghostUrl = "https://nozzlegear.ngrok.io"
   nodeEnv = "development"
+
+  // Optional: Override instance name and credentials
+  // Uncomment and modify these to customize your deployment:
+  // instanceName = "myghostinstance"
+  // secretName = "myghostinstance_secrets"
+  // mysqlUser = "myghostuser"
+  // mysqlDatabase = "myghostinstance_db"
 }

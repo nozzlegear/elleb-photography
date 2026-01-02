@@ -6,6 +6,18 @@ class Environment {
   /// Whether this is a development environment
   isDev: Boolean
 
+  /// Instance name (used for pod, volumes, and container names)
+  instanceName: String = "ellebphotos"
+
+  /// Secret name for database credentials
+  secretName: String = "elleb_photos_secrets"
+
+  /// MySQL user name
+  mysqlUser: String = "ellebphotos"
+
+  /// MySQL database name
+  mysqlDatabase: String = "ellebphotos_ghost"
+
   /// Host path for the Ghost theme (only used in dev)
   themeHostPath: String?
 
@@ -28,12 +40,9 @@ class Environment {
 /// Configuration values
 const environment: Environment
 
-/// MySQL configuration
-const mysqlUser: String = "ellebphotos"
-const mysqlDatabase: String = "ellebphotos_ghost"
+/// Image configuration
 const mysqlImage: String = "docker.io/library/mysql:9.5.0@sha256:569c4128dfa625ac2ac62cdd8af588a3a6a60a049d1a8d8f0fac95880ecdbbe5"
 const ghostImage: String = "docker.io/library/ghost:6.7.0-bookworm"
-const secretName: String = "elleb_photos_secrets"
 
 /// Generate the database container spec
 function dbContainer() = new {
@@ -42,11 +51,11 @@ function dbContainer() = new {
   env = new Listing {
     new {
       name = "MYSQL_USER"
-      value = mysqlUser
+      value = environment.mysqlUser
     }
     new {
       name = "MYSQL_DATABASE"
-      value = mysqlDatabase
+      value = environment.mysqlDatabase
     }
     new {
       name = "MYSQL_PASSWORD_FILE"
@@ -117,17 +126,17 @@ function siteContainer() = new {
     }
     new {
       name = "database__connection__database"
-      value = mysqlDatabase
+      value = environment.mysqlDatabase
     }
     new {
       name = "database__connection__user"
-      value = mysqlUser
+      value = environment.mysqlUser
     }
     new {
       name = "database__connection__password"
       valueFrom = new {
         secretKeyRef = new {
-          name = secretName
+          name = environment.secretName
           key = "MYSQL_PASSWORD"
         }
       }
@@ -184,19 +193,19 @@ function volumes() = new Listing {
   new {
     name = "db"
     persistentVolumeClaim = new {
-      claimName = "ellebphotos_db"
+      claimName = "\(environment.instanceName)_db"
     }
   }
   new {
     name = "ghost"
     persistentVolumeClaim = new {
-      claimName = "ellebphotos_ghost"
+      claimName = "\(environment.instanceName)_ghost"
     }
   }
   new {
     name = "mysql-password"
     secret = new {
-      ["secretName"] = secretName
+      ["secretName"] = environment.secretName
       items = new Listing {
         new {
           key = "MYSQL_PASSWORD"
@@ -208,7 +217,7 @@ function volumes() = new Listing {
   new {
     name = "mysql-root-password"
     secret = new {
-      ["secretName"] = secretName
+      ["secretName"] = environment.secretName
       items = new Listing {
         new {
           key = "MYSQL_ROOT_PASSWORD"
@@ -245,9 +254,9 @@ output {
     apiVersion = "v1"
     kind = "Pod"
     metadata = new {
-      name = "ellebphotos"
+      name = environment.instanceName
       labels = new {
-        ["app"] = "ellebphotos"
+        ["app"] = environment.instanceName
       }
     }
     spec = new {
