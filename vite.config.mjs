@@ -28,7 +28,7 @@ const getEntries = (entryPoints) => entryPoints.reduce((entries, file) => {
 // Get the rollup input config to check if entries are Svelte files
 const inputConfig = getEntries([
   'js/main.ts',
-  'js/pages/products.ts',
+  'js/pages/products-page.svelte',
   'js/cart-sidebar.svelte',
   'css/main.css',
   'css/amp.css',
@@ -68,8 +68,8 @@ export default defineConfig({
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
           if (assetInfo.name.endsWith('.css')) {
-            const name = assetInfo.name.replace('.css', '')
-            return `styles/${name}.css`
+            let name = assetInfo.name.replace('.css', '')
+            return name.includes("css/") ? `styles/${name}.css` : `styles/css/${name}.css`;
           }
           return 'assets/[name].[ext]'
         },
