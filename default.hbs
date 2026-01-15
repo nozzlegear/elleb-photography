@@ -38,6 +38,11 @@
     <meta name="stripe-publishable-key" content="{{ @custom.stripe_publishable_key }}" />
     {{/if}}
 
+    {{!-- Medusa Configuration --}}
+    <meta name="medusa-public-key" content="{{ @custom.medusa_public_key }}" />
+    <meta name="medusa-base-url" content="{{ @custom.medusa_base_url }}" />
+    <meta name="medusa-debug-mode" content="{{ @custom.medusa_debug_mode }}" />
+
 </head>
 <body class="{{body_class}}">
     {{!-- Site Header - partials/header.hbs --}}
