@@ -90,3 +90,38 @@ export async function setItemQuantity(sdk: Sdk, cartId: string, lineItemId: stri
   const result = await sdk.store.cart.updateLineItem(cartId, lineItemId, { quantity });
   return result.cart;
 }
+
+type AddDigitalToCartResponse = {
+  ok: true;
+};
+
+/**
+ * Adds a product to the cart via the custom digital endpoint.
+ * This endpoint handles both physical and digital items, setting appropriate metadata.
+ *
+ * @param isDigital - If true, the item is added as a digital purchase with special metadata
+ */
+export async function addDigitalItemToCart(
+  sdk: Sdk,
+  cartId: string,
+  productId: string,
+  variantId: string,
+): Promise<StoreCart> {
+  const response = await sdk.client.fetch<AddDigitalToCartResponse>(
+    `/store/custom/cart-add-digital`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: {
+        cart_id: cartId,
+        product_id: productId,
+        variant_id: variantId,
+        quantity: 1,
+        is_digital: true,
+      },
+    }
+  );
+
+  // Must refetch the cart, as this endpoint doesn't send it back
+  return await getCart(sdk, cartId);
+}
