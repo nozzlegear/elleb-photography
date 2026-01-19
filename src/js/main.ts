@@ -1,4 +1,5 @@
 import 'lazysizes'
+import { toggleSideNav } from "./utils";
 
 ((window, document) => {
   /* Load Script and Styles
@@ -22,8 +23,7 @@ import 'lazysizes'
   document.querySelectorAll('.js-menu-toggle').forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault()
-
-      document.body.classList.toggle('has-sidenav')
+      toggleSideNav();
     })
   })
 
