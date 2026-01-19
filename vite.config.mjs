@@ -29,7 +29,9 @@ const getEntries = (entryPoints) => entryPoints.reduce((entries, file) => {
 const inputConfig = getEntries([
   'js/main.ts',
   'js/pages/products-page.svelte',
+  'js/pages/order-placed.svelte',
   'js/cart-sidebar.svelte',
+  'js/cart-icon.svelte',
   'css/main.css',
   'css/amp.css',
   'css/pages/store.css',
@@ -65,7 +67,9 @@ export default defineConfig({
 
           return '[name].js'
         },
-        chunkFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: (assetInfo) => {
+            return 'chunks/[name]-[hash].js'
+        },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name.endsWith('.css')) {
             let name = assetInfo.name.replace('.css', '')
