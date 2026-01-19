@@ -13,7 +13,7 @@
         <nav class="navbar hidden justify-center items-center lg:flex">{{navigation}}</nav>
 
         <div class="header-right flex flex-grow justify-end">
-            {{!-- Facebook & Twitter - partials/witget/witget-social-media.hbs --}}
+            {{!-- Facebook & Twitter - partials/widget/witget-social-media.hbs --}}
             {{!-- {{> "widget/witget-social-media"}} --}}
 
             <ul class="flex items-center ml-3 space-x-5">
@@ -29,9 +29,8 @@
                 </li>
                 {{/if}}
                 {{!-- Cart Button --}}
-                <li class="cart-button cursor-pointer relative">
-                    <svg class="icon is-stroke w-6 h-6"><use xlink:href="#icon-cart"></use></svg>
-                    <span class="cart-count absolute -top-2 -right-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                <li class="js-menu-toggle menu-toggle cursor-pointer cart-button relative">
+                    <cart-icon></cart-icon>
                 </li>
                 {{!-- Toggle Menu --}}
                 <li class="js-menu-toggle menu-toggle cursor-pointer"><svg class="icon is-stroke"><use xlink:href="#icon-menu"></use></svg></li>
@@ -39,3 +38,6 @@
         </div>
     </div>
 </header>
+
+{{!-- Cart Icon --}}
+<script type="module" src="{{asset "js/cart-icon.svelte-loader.js"}}"></script>
