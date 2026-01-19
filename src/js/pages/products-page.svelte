@@ -3,16 +3,33 @@ import * as products from "../medusa/products";
 import { configureSdk } from "../medusa/index";
 import ProductImage from "./components/ProductImage.svelte";
 import { formatPrice } from "../medusa/format-price";
-import { createOrRetrieveCart, addItemToCart } from "../medusa/cart";
-import type { StoreProduct, StoreProductOption } from "@medusajs/types";
-import { SvelteMap } from "svelte/reactivity";
+import { createOrRetrieveCart, addDigitalItemToCart, addItemToCart } from "../medusa/cart";
+import { fetchDigitalProductInfoBatch, type DigitalProductInfo } from "../medusa/digital-products";
+import type { StoreProductOption, StoreCart } from "@medusajs/types";
+import { SvelteMap, SvelteSet } from "svelte/reactivity";
+  import { openSideNav } from "../utils";
 
-const sdk = configureSdk();
+const configuredSdk = configureSdk();
 
-if (!sdk)
+if (!configuredSdk)
   throw new Error('SDK not configured.');
 
-const loadedProducts = await products.listProducts(sdk);
+const sdk = configuredSdk;
+
+// Load products and cart in parallel
+const [loadedProducts, initialCart] = await Promise.all([
+  products.listProducts(sdk),
+  createOrRetrieveCart(sdk)
+]);
+
+let cart = $state<StoreCart>(initialCart);
+
+// Fetch digital info for all products
+const allProductIds = loadedProducts.products.map(p => p.id);
+let digitalProductsInfo = $state<Map<string, DigitalProductInfo>>(
+  await fetchDigitalProductInfoBatch(sdk, allProductIds)
+);
+
 // Select the first value for each option as a default
 let selectedOptions = $state<SvelteMap<string, string>>(loadedProducts.products.reduce((state, product) => {
   for (const option of product.options!) {
@@ -23,6 +40,18 @@ let selectedOptions = $state<SvelteMap<string, string>>(loadedProducts.products.
 
   return state;
 }, new SvelteMap<string, string>()));
+
+// Track "Include digital file" checkbox per product
+let includeDigitalCheckbox = $state<SvelteMap<string, boolean>>(
+  new SvelteMap(
+    loadedProducts.products
+      .filter(p => digitalProductsInfo.has(p.id))
+      .map(p => [p.id, false])
+  )
+);
+
+// Track loading state per product (using SvelteSet for automatic reactivity)
+let addingToCart = $state<SvelteSet<string>>(new SvelteSet());
 
 // Use composite keys: "productId:optionId" -> selectedValueId
 function makeCompositeKey(productId: string, optionId: string): string {
@@ -58,30 +87,36 @@ function getSelectedOptionsForProduct(productId: string): Map<string, string> {
   return result;
 }
 
-function formatSelectedVariantPrice(productId: string): string {
+function getSelectedVariantForProduct(productId: string) {
   const productOptions = getSelectedOptionsForProduct(productId);
   const selectedOptionsLength = productOptions.size;
 
   if (selectedOptionsLength === 0) {
-    return "";
+    return null;
   }
 
   const product = loadedProducts.products.find(p => p.id === productId);
   if (!product) {
-    return "";
+    return null;
   }
 
   // Find matching variant based on selected options
+  // Check that each variant option's value ID matches the selected value ID
   const matchingVariant = (product?.variants ?? []).find(variant => {
     if (!variant.options) return false;
     if (variant.options.length !== selectedOptionsLength) return false;
 
     return variant.options.every(variantOption => {
-      return productOptions.has(variantOption.option_id!);
+      const selectedValueId = productOptions.get(variantOption.option_id!);
+      return selectedValueId === variantOption.id;
     });
   });
 
-  console.log({matchingVariant, productOptions, selectedOptionsLength})
+  return matchingVariant ?? null;
+}
+
+function formatSelectedVariantPrice(productId: string): string {
+  const matchingVariant = getSelectedVariantForProduct(productId);
 
   return matchingVariant?.calculated_price
     ? formatPrice(matchingVariant.calculated_price, "subtotal")
@@ -101,6 +136,118 @@ function getProductIdsWithSelections(): string[] {
 let selectedVariantPrices = $derived(new Map<string, string>(
   getProductIdsWithSelections().map(productId => [productId, formatSelectedVariantPrice(productId)])
 ))
+
+// Compute total price (physical + digital if checkbox checked)
+function getDisplayPrice(productId: string): string {
+  const physicalPrice = selectedVariantPrices.get(productId) ?? "";
+  const includeDigital = includeDigitalCheckbox.get(productId) ?? false;
+  const digitalInfo = digitalProductsInfo.get(productId);
+
+  if (!includeDigital || !digitalInfo?.digital_price) {
+    return physicalPrice;
+  }
+
+  // Get the physical price amount
+  const variant = getSelectedVariantForProduct(productId);
+  if (!variant?.calculated_price) {
+    return physicalPrice;
+  }
+
+  const physicalAmount = variant.calculated_price.calculated_amount_without_tax
+    ?? variant.calculated_price.original_amount
+    ?? 0;
+  // Digital price from API is in cents, convert to match Medusa's format
+  const digitalAmount = digitalInfo.digital_price / 100;
+  const totalAmount = physicalAmount + digitalAmount;
+  const currency = variant.calculated_price.currency_code ?? "usd";
+
+  return formatPrice(totalAmount, currency);
+}
+
+// Add physical item to cart
+async function handleAddToCart(productId: string) {
+  const variant = getSelectedVariantForProduct(productId);
+  if (!variant) {
+    console.error("No variant selected for product", productId);
+    return;
+  }
+
+  addingToCart.add(productId);
+
+  try {
+    const includeDigital = includeDigitalCheckbox.get(productId) ?? false;
+
+    // Add physical item
+    let updatedCart = await addItemToCart(sdk, cart.id, variant.id);
+
+    // If checkbox is checked, also add digital item
+    if (includeDigital && digitalProductsInfo.has(productId)) {
+      updatedCart = await addDigitalItemToCart(sdk, updatedCart.id, productId, variant.id);
+    }
+
+    cart = updatedCart;
+
+    // Open the cart sidenav and dispatch a cart-updated event
+    openSideNav();
+    window.dispatchEvent(new CustomEvent('cart-updated', { detail: cart }));
+
+    // Reset checkbox after adding
+    includeDigitalCheckbox.set(productId, false);
+  } catch (error) {
+    console.error("Failed to add item to cart:", error);
+  } finally {
+    addingToCart.delete(productId);
+  }
+}
+
+// Add digital-only item to cart
+async function handleBuyDigitalOnly(productId: string) {
+  const variant = getSelectedVariantForProduct(productId);
+  if (!variant) {
+    // For digital-only, we can use any variant (backend uses it for reference)
+    const product = loadedProducts.products.find(p => p.id === productId);
+    if (!product?.variants?.[0]) {
+      console.error("No variant available for product", productId);
+      return;
+    }
+  }
+
+  addingToCart.add(productId);
+
+  try {
+    // Use selected variant or fall back to first variant
+    const variantId = variant?.id ?? loadedProducts.products.find(p => p.id === productId)?.variants?.[0]?.id;
+    if (!variantId) {
+      console.error("No variant ID available for product", productId);
+      return;
+    }
+
+    const updatedCart = await addDigitalItemToCart(sdk, cart.id, productId, variantId);
+    cart = updatedCart;
+
+    // Open the cart sidenav and dispatch a cart-updated event
+    openSideNav();
+    window.dispatchEvent(new CustomEvent('cart-updated', { detail: cart }));
+  } catch (error) {
+    console.error("Failed to add digital item to cart:", error);
+  } finally {
+    addingToCart.delete(productId);
+  }
+}
+
+// Format digital price for display
+function formatDigitalPrice(productId: string): string {
+  const digitalInfo = digitalProductsInfo.get(productId);
+  if (!digitalInfo?.digital_price) return "";
+
+  // Digital price is in cents from the API, convert to dollars for formatPrice
+  return formatPrice(digitalInfo.digital_price / 100, "usd");
+}
+
+// Check if product has digital version
+function hasDigitalVersion(productId: string): boolean {
+  return digitalProductsInfo.has(productId);
+}
 
 </script>
 
@@ -126,8 +273,11 @@ let selectedVariantPrices = $derived(new Map<string, string>(
     hyphens: none;
   }
   .kg-product-card, .kg-product-card * {
-      text-wrap-mode: wrap;
-      font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    text-wrap-mode: wrap;
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  }
+  .kg-product-card-actions > .kg-product-digital-only-section > button.kg-product-card-button.kg-product-card-btn-secondary {
+    width: 100%;
   }
 </style>
 
@@ -155,26 +305,6 @@ let selectedVariantPrices = $derived(new Map<string, string>(
             <div class="kg-product-card-variants">
               <hr>
 
-              {#if true}
-                <div class="kg-product-option">
-                  <label for="digital-only" class="kg-product-option-label">
-                    Format
-                  </label>
-                  <select>
-                    <option value="physical-only">
-                      Physical Print
-                    </option>
-                    <option value="digital-only">
-                      Digital File only
-                    </option>
-                    <option value="physical-and-digital">
-                      Physical Print and Digital File
-                    </option>
-                  </select>
-                </div>
-                <hr>
-              {/if}
-
                 {#each product.options as option}
                 <div class="kg-product-option">
                   <label for={option.id} class="kg-product-option-label">
@@ -195,16 +325,59 @@ let selectedVariantPrices = $derived(new Map<string, string>(
                   </select>
                 </div>
                 {/each}
+
+                {#if hasDigitalVersion(product.id)}
+                  <hr>
+                  <div class="kg-product-digital-option">
+                    <label class="kg-product-digital-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={includeDigitalCheckbox.get(product.id) ?? false}
+                        onchange={(e) => includeDigitalCheckbox.set(product.id, e.currentTarget.checked)}
+                      />
+                      <span>Include digital file (+{formatDigitalPrice(product.id)})</span>
+                    </label>
+                  </div>
+                {/if}
             </div>
 
             <div class="kg-product-card-price">
                 Price:
-                <span class="kg-product-card-price-amount">{selectedVariantPrices.get(product.id) ?? ""}</span>
+                <span class="kg-product-card-price-amount">{getDisplayPrice(product.id)}</span>
             </div>
 
-            <button class="kg-product-card-button kg-product-card-btn-accent button is-primary">
-                <span class="kg-product-card-button-text">Add to Cart</span>
-            </button>
+            <div class="kg-product-card-actions">
+              <button
+                class="kg-product-card-button kg-product-card-btn-accent button is-primary"
+                disabled={addingToCart.has(product.id)}
+                onclick={() => handleAddToCart(product.id)}>
+                  <span class="kg-product-card-button-text">
+                    {#if addingToCart.has(product.id)}
+                      Adding...
+                    {:else}
+                      Add to Cart
+                    {/if}
+                  </span>
+              </button>
+
+              {#if hasDigitalVersion(product.id)}
+                <div class="kg-product-digital-only-section">
+                  <p class="kg-product-digital-only-text">Not interested in a physical print?</p>
+                  <button
+                    class="kg-product-card-button kg-product-card-btn-secondary button is-secondary"
+                    disabled={addingToCart.has(product.id)}
+                    onclick={() => handleBuyDigitalOnly(product.id)}>
+                      <span class="kg-product-card-button-text">
+                        {#if addingToCart.has(product.id)}
+                          Adding...
+                        {:else}
+                          Buy Digital File Only - {formatDigitalPrice(product.id)}
+                        {/if}
+                      </span>
+                  </button>
+                </div>
+              {/if}
+            </div>
         </div>
     </div>
 {/each}
