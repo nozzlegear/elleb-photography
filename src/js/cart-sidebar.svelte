@@ -22,6 +22,10 @@
   const cartPromise = createOrRetrieveCart(sdk).then(async (userCart) => {
     cart = userCart;
     loading = {type: "done"};
+
+    // Emit an initial cart-updated event for other components
+    window.dispatchEvent(new CustomEvent('cart-updated', { detail: userCart }));
+
     return userCart;
   });
 
@@ -70,10 +74,10 @@
   }
 
   async function refreshCart(event: Event) {
-    if (event.type !== "cart-updated")
+    if (event.type !== "cart-updated") {
       return;
+    }
     if (!(event instanceof CustomEvent)) {
-      console.error("RefreshCart received an event that's not an instance of CustomEvent:", event);
       return;
     }
 
@@ -156,7 +160,12 @@
                 {#each cart.items! as item (item.id)}
                 <div class="cart-item">
                     <div class="cart-item-details">
-                        <h5 class="cart-item-variant">{item.variant_title}</h5>
+                        <h5 class="cart-item-variant">
+                          {item.variant_title}
+                          {#if item.metadata?.is_digital}
+                            <span class="cart-item-digital-badge">(Digital)</span>
+                          {/if}
+                        </h5>
                         <h4 class="cart-item-title">{item.product_title}</h4>
                     </div>
                     <div class="cart-item-image">

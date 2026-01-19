@@ -245,3 +245,15 @@ body {
   color: rgba(255, 255, 255, .66);
 }
 
+.cart-item-digital-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  background: rgba(76, 175, 80, 0.25);
+  color: #81c784;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
