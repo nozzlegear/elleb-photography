@@ -130,7 +130,7 @@
   "scripts": {
     "build": "npm run build:vite && npm run build:zip",
     "build:vite": "vite build",
-    "build:zip": "zip -x 'node_modules/*' -x '.git/*' -x '*.zip' -x 'vite*' -x 'svelte.config.*' -x 'tsconfig.*' -x 'quadlet/*' -x '.pkl-lsp/*' -x 'ghost-config.*' -x '.claude/*' -x '.idea/*' -x '.DS_Store' -x 'README.md' -r ghost-elleb-photography-theme .",
+    "build:zip": "zip -x 'node_modules/*' -x '.git/*' -x '*.zip' -x 'vite*' -x 'svelte.config.*' -x 'tsconfig.*' -x 'quadlet/*' -x '.pkl-lsp/*' -x 'ghost-config.*' -x '.claude/*' -x '.idea/*' -x '.DS_Store' -x 'README.md' -x 'CLAUDE.md' -r ghost-elleb-photography-theme .",
     "prod": "cross-env NODE_ENV=production vite build",
     "dev": "cross-env NODE_ENV=development vite build --watch",
     "format": "biome format --write src/js/ src/css/pages",
