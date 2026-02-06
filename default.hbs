@@ -6,6 +6,11 @@
         ✉ https://godofredo.ninja
         ✎ @GodoFredoNinja
         ✈ Lima - Perú
+
+    Customization and eCommerce features by:
+    ——————————
+        Nozzlegear Software
+        https://nozzlegear.com
 -->
 <html lang="{{@site.locale}}">
 <head>
@@ -42,6 +47,10 @@
     <meta name="medusa-public-key" content="{{ @custom.medusa_public_key }}" />
     <meta name="medusa-base-url" content="{{ @custom.medusa_base_url }}" />
     <meta name="medusa-debug-mode" content="{{ @custom.medusa_debug_mode }}" />
+
+    {{!-- Store Configuration --}}
+    <meta name="store-contact-email" content="{{ @custom.store_contact_email }}" />
+    <meta name="site-title" content="{{ @site.title }}" />
 
 </head>
 <body class="{{body_class}}">

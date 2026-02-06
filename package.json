@@ -97,6 +97,10 @@
         "description": "Turns the Medusa integration's debug mode on or off.",
         "default": false
       },
+      "store_contact_email": {
+        "type": "text",
+        "description": "Contact email for store order inquiries. Shown on order confirmation page."
+      },
       "publication_cover": {
         "type": "select",
         "options": [
