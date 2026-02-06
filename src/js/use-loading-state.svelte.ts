@@ -5,10 +5,11 @@ export type LoadingState =
 type SetLoadingStateFn = (loadingOrError: boolean | string) => void;
 
 export function useLoadingState(defaultIsLoading: boolean) {
-  let state = $state({
-    loading: defaultIsLoading,
-    error: null,
-  });
+  let state = $state<LoadingState>(
+    defaultIsLoading
+      ? { loading: true, error: null }
+      : { loading: false, error: null }
+  );
 
   const setLoadingState: SetLoadingStateFn = (value) => {
     if (value === true) {

@@ -26,12 +26,12 @@ let cart = $state<StoreCart>(initialCart);
 
 // Fetch digital info for all products
 const allProductIds = loadedProducts.products.map(p => p.id);
-let digitalProductsInfo = $state<Map<string, DigitalProductInfo>>(
+const digitalProductsInfo = $state<Map<string, DigitalProductInfo>>(
   await fetchDigitalProductInfoBatch(sdk, allProductIds)
 );
 
 // Select the first value for each option as a default
-let selectedOptions = $state<SvelteMap<string, string>>(loadedProducts.products.reduce((state, product) => {
+const selectedOptions = $state<SvelteMap<string, string>>(loadedProducts.products.reduce((state, product) => {
   for (const option of product.options!) {
     const firstValue = option.values![0];
     if (firstValue)
@@ -42,7 +42,7 @@ let selectedOptions = $state<SvelteMap<string, string>>(loadedProducts.products.
 }, new SvelteMap<string, string>()));
 
 // Track "Include digital file" checkbox per product
-let includeDigitalCheckbox = $state<SvelteMap<string, boolean>>(
+const includeDigitalCheckbox = $state<SvelteMap<string, boolean>>(
   new SvelteMap(
     loadedProducts.products
       .filter(p => digitalProductsInfo.has(p.id))
@@ -51,7 +51,7 @@ let includeDigitalCheckbox = $state<SvelteMap<string, boolean>>(
 );
 
 // Track loading state per product (using SvelteSet for automatic reactivity)
-let addingToCart = $state<SvelteSet<string>>(new SvelteSet());
+const addingToCart = $state<SvelteSet<string>>(new SvelteSet());
 
 // Use composite keys: "productId:optionId" -> selectedValueId
 function makeCompositeKey(productId: string, optionId: string): string {
@@ -133,7 +133,7 @@ function getProductIdsWithSelections(): string[] {
   return Array.from(productIds);
 }
 
-let selectedVariantPrices = $derived(new Map<string, string>(
+const selectedVariantPrices = $derived(new Map<string, string>(
   getProductIdsWithSelections().map(productId => [productId, formatSelectedVariantPrice(productId)])
 ))
 
