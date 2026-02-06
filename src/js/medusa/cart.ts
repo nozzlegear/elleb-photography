@@ -41,10 +41,50 @@ function cartIsCompleted(cart: StoreCart): boolean {
 }
 
 /**
+ * Gets the order ID from a completed cart's metadata.
+ * Returns null if the cart hasn't been completed or has no order ID.
+ */
+export function getOrderIdFromCart(cart: StoreCart): string | null {
+  if (!cartIsCompleted(cart)) {
+    return null;
+  }
+  const orderId = cart.metadata?.order_id;
+  return typeof orderId === "string" ? orderId : null;
+}
+
+/**
+ * Clears the stored cart ID from localStorage.
+ * Should be called after an order is placed to ensure the next cart is fresh.
+ */
+export function clearStoredCartId(): void {
+  clearCartId();
+}
+
+/**
+ * Gets the current cart if one exists in localStorage.
+ * Does not create a new cart if none exists.
+ * Returns null if no cart ID is stored.
+ */
+export async function getCurrentCart(sdk: Sdk): Promise<StoreCart | null> {
+  const existingId = localStorage.getItem(CART_ID_KEY);
+  if (!existingId) {
+    return null;
+  }
+
+  try {
+    return await getCart(sdk, existingId);
+  } catch {
+    // Cart may have been deleted or expired
+    clearCartId();
+    return null;
+  }
+}
+
+/**
  * Gets the Medusa cart with the given id. Does not check if the cart has already been purchased.
  */
 async function getCart(sdk: Sdk, cartId: string): Promise<StoreCart> {
-  let { cart } = await sdk.store.cart.retrieve(cartId);
+  const { cart } = await sdk.store.cart.retrieve(cartId);
   return cart;
 }
 
