@@ -29,12 +29,14 @@ const getEntries = (entryPoints) => entryPoints.reduce((entries, file) => {
 const inputConfig = getEntries([
   'js/main.ts',
   'js/pages/products-page.svelte',
-  'js/pages/order-placed.svelte',
+  'js/pages/order-placed-page.svelte',
   'js/cart-sidebar.svelte',
   'js/cart-icon.svelte',
   'css/main.css',
   'css/amp.css',
   'css/pages/store.css',
+  'css/pages/store-order-placed.css',
+  'css/partials/store-faq.css',
 ]);
 
 const BuildComments = `/*!

@@ -86,19 +86,43 @@ export function ghostSveltePlugin(options = {}) {
         const kebabName = baseName;
 
         // Import the existing entry
+        // Props are passed via data-props attribute as JSON on the target element
         return `
           import { mount } from "svelte";
           import Component from "${originalPath}";
 
           // Auto-instantiate on load
+          // Use requestAnimationFrame to ensure Svelte's reactive context is properly established
+          // This prevents the effect_orphan error that occurs when $effect runs outside component init
           if (typeof document !== 'undefined') {
-            const targetTag = '${kebabName}';
-            const target = document.querySelector(targetTag);
+            const doMount = () => {
+              const targetTag = '${kebabName}';
+              const target = document.querySelector(targetTag);
 
-            if (target) {
-              mount(Component, { target, props: {} });
+              if (target) {
+                // Parse props from data-props attribute if present
+                let props = {};
+                const propsAttr = target.getAttribute('data-props');
+                if (propsAttr) {
+                  try {
+                    props = JSON.parse(propsAttr);
+                  } catch (e) {
+                    console.error('[Ghost Svelte] Failed to parse data-props:', e);
+                  }
+                }
+
+                mount(Component, { target, props });
+              } else {
+                console.warn('[Ghost Svelte] Target element <${kebabName}> not found');
+              }
+            };
+
+            // Schedule mount after current execution context to ensure proper Svelte initialization
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', doMount);
             } else {
-              console.warn('[Ghost Svelte] Target element <${kebabName}> not found');
+              // Use requestAnimationFrame to defer to next frame, ensuring proper reactive context
+              requestAnimationFrame(doMount);
             }
           }
         `;
