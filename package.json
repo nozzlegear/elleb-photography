@@ -2,7 +2,7 @@
   "name": "paway",
   "description": "For fancy people, Photographers and Travel Lovers",
   "demo": "https://godofredo.ninja",
-  "version": "0.0.10",
+  "version": "1.1.0",
   "type": "module",
   "engines": {
     "ghost": ">=5.0.0"
