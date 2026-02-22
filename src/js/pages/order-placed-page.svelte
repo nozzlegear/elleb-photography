@@ -364,10 +364,22 @@
         line-height: 1.6;
     }
 
+    .order-summary {
+        margin-top: 1rem;
+    }
+
+    .order-summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        color: #6b7280;
+    }
+
     .order-total {
         display: flex;
         justify-content: space-between;
         padding-top: 1rem;
+        margin-top: 0.5rem;
         border-top: 2px solid #e5e7eb;
         font-size: 1.25rem;
         font-weight: 700;
@@ -674,9 +686,25 @@
           </div>
         {/if}
 
-        <div class="order-total">
-          <span>Total</span>
-          <span>{formatPrice(order.total, order.currency_code)}</span>
+        <div class="order-summary">
+          <div class="order-summary-row">
+            <span>Subtotal</span>
+            <span>{formatPrice(order.subtotal, order.currency_code)}</span>
+          </div>
+          {#if showShipping}
+            <div class="order-summary-row">
+              <span>Shipping</span>
+              <span>{formatPrice(order.shipping_total ?? 0, order.currency_code)}</span>
+            </div>
+          {/if}
+          <div class="order-summary-row">
+            <span>Tax</span>
+            <span>{formatPrice(order.tax_total ?? 0, order.currency_code)}</span>
+          </div>
+          <div class="order-total">
+            <span>Total</span>
+            <span>{formatPrice(order.total, order.currency_code)}</span>
+          </div>
         </div>
       </div>
 
